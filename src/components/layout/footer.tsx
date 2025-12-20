@@ -1,0 +1,101 @@
+import Link from 'next/link';
+import { Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
+import Logo from '@/components/icons/logo';
+
+const socialLinks = [
+  { icon: Twitter, href: '#' },
+  { icon: Instagram, href: '#' },
+  { icon: Linkedin, href: '#' },
+  { icon: Facebook, href: '#' },
+];
+
+const footerLinks = [
+  {
+    title: 'Platform',
+    links: [
+      { name: 'Admission', href: '#' },
+      { name: 'Private Jobs', href: '/submit-job' },
+      { name: 'News', href: '#' },
+      { name: 'Books & E-Books', href: '#' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { name: 'About Us', href: '#' },
+      { name: 'Careers', href: '#' },
+      { name: 'Advertise', href: '#' },
+      { name: 'Contact', href: '#' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { name: 'Privacy Policy', href: '#' },
+      { name: 'Terms of Service', href: '#' },
+      { name: 'Cookie Policy', href: '#' },
+    ],
+  },
+];
+
+export default function Footer() {
+  return (
+    <footer className="relative w-full bg-background border-t border-white/10 overflow-hidden py-16">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl opacity-50 animate-blob"></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-secondary/10 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <div className="col-span-1 lg:col-span-2">
+            <Link href="/" className="flex items-center space-x-2">
+              <Logo className="h-10 w-10 text-primary" />
+              <span className="font-headline text-2xl font-bold">NexusEd</span>
+            </Link>
+            <p className="mt-4 text-muted-foreground max-w-xs">
+              Your futuristic portal to knowledge, careers, and digital services.
+            </p>
+            <div className="flex space-x-4 mt-6">
+              {socialLinks.map((social, index) => (
+                <Link
+                  key={index}
+                  href={social.href}
+                  className="text-muted-foreground hover:text-primary transform hover:-translate-y-1 transition-all duration-300"
+                >
+                  <social.icon className="h-6 w-6" />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {footerLinks.map((section) => (
+            <div key={section.title}>
+              <h3 className="font-headline text-lg font-semibold text-foreground">
+                {section.title}
+              </h3>
+              <ul className="mt-4 space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="relative text-muted-foreground hover:text-primary transition-colors group"
+                    >
+                      {link.name}
+                      <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-16 pt-8 border-t border-white/10 text-center text-muted-foreground text-sm">
+          <p>&copy; {new Date().getFullYear()} NexusEd. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

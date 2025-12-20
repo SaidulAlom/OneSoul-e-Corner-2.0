@@ -1,0 +1,136 @@
+"use client";
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Menu, X, BookOpen, Briefcase, Newspaper, GraduationCap } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import Logo from '@/components/icons/logo';
+
+const navItems = [
+  { name: 'Admission', href: '#', icon: GraduationCap },
+  { name: 'Private Jobs', href: '/submit-job', icon: Briefcase },
+  { name: 'News', href: '#', icon: Newspaper },
+  { name: 'Books', href: '#', icon: BookOpen },
+];
+
+export default function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+  return (
+    <>
+      <header
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'py-4'
+        )}
+      >
+        <div className="container mx-auto max-w-7xl px-4 md:px-8">
+          <div className="flex items-center justify-between rounded-full bg-black/30 backdrop-blur-lg border border-white/10 px-4 py-2 shadow-2xl shadow-primary/10">
+            <Link href="/" className="flex items-center space-x-2">
+              <Logo className="h-8 w-8 animate-[breathe_4s_ease-in-out_infinite]" />
+              <span className="font-headline text-xl font-bold text-white">
+                NexusEd
+              </span>
+            </Link>
+
+            <nav className="hidden md:flex items-center space-x-2">
+              {navItems.map((item) => (
+                <NavLink key={item.name} href={item.href}>
+                  {item.name}
+                </NavLink>
+              ))}
+            </nav>
+
+            <div className="flex items-center">
+              <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign In</Button>
+              <Button size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                Sign Up
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={toggleMobileMenu}
+                aria-label="Toggle menu"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: '-100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '-100%' }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl md:hidden"
+          >
+            <div className="container mx-auto px-4 h-full">
+              <div className="flex justify-between items-center py-4">
+                 <Link href="/" className="flex items-center space-x-2" onClick={toggleMobileMenu}>
+                    <Logo className="h-8 w-8" />
+                    <span className="font-headline text-xl font-bold text-white">
+                      NexusEd
+                    </span>
+                  </Link>
+                <Button variant="ghost" size="icon" onClick={toggleMobileMenu} aria-label="Close menu">
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
+              <nav className="flex flex-col items-center justify-center h-[calc(100%-100px)] -mt-8">
+                <ul className="space-y-8 text-center">
+                  {navItems.map((item, i) => (
+                    <motion.li
+                      key={item.name}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={toggleMobileMenu}
+                        className="flex items-center gap-4 text-3xl font-headline text-foreground/80 hover:text-primary transition-colors"
+                      >
+                        <item.icon className="h-8 w-8" />
+                        {item.name}
+                      </Link>
+                    </motion.li>
+                  ))}
+                </ul>
+                <div className="absolute bottom-16 flex gap-4">
+                  <Button variant="outline" size="lg">Sign In</Button>
+                  <Button size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                    Sign Up
+                  </Button>
+                </div>
+              </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+  return (
+    <Link
+      href={href}
+      className="relative group px-3 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors duration-300"
+    >
+      <span className="relative z-10 group-hover:-translate-y-0.5 transition-transform duration-300">
+        {children}
+      </span>
+      <span className="absolute bottom-1 left-1/2 w-full h-0.5 bg-primary origin-bottom-left transform -translate-x-1/2 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+    </Link>
+  );
+};
