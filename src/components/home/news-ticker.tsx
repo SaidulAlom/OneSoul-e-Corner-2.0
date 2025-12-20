@@ -20,15 +20,18 @@ export default function NewsTicker() {
   useEffect(() => {
     async function loadContent() {
       try {
-        // Check for placeholder API key
-        if (process.env.NEXT_PUBLIC_GEMINI_API_KEY === 'YOUR_API_KEY_HERE' || !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-          throw new Error('API key is not configured.');
-        }
+        // We'll optimistically try to fetch content. The flow will handle the API key error.
         const result = await dynamicContentLoading({
           userInteractions: 'User is interested in technology, higher education, and software development job market trends.',
           contentType: 'news',
         });
-        setContent(result.relevantContent);
+        
+        if (result && result.relevantContent && result.relevantContent.length > 0) {
+          setContent(result.relevantContent);
+        } else {
+          // The AI might return empty content, so we fall back.
+          throw new Error("AI returned no content.");
+        }
       } catch (error) {
         console.error('Failed to load dynamic content, using fallback:', error);
         setContent(fallbackContent);
