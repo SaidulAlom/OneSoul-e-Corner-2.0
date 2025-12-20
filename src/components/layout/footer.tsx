@@ -13,19 +13,18 @@ const footerLinks = [
   {
     title: 'Platform',
     links: [
-      { name: 'Admission', href: '#' },
-      { name: 'Private Jobs', href: '/submit-job' },
-      { name: 'News', href: '#' },
-      { name: 'Books & E-Books', href: '#' },
+      { name: 'News', href: '/news' },
+      { name: 'Jobs', href: '/jobs' },
+      { name: 'Vlogs', href: '/vlogs' },
+      { name: 'E-Books', href: '/e-books' },
     ],
   },
   {
     title: 'Company',
     links: [
-      { name: 'About Us', href: '#' },
-      { name: 'Careers', href: '#' },
-      { name: 'Advertise', href: '#' },
-      { name: 'Contact', href: '#' },
+      { name: 'About', href: '/about' },
+      { name: 'Services', href: '/services' },
+      { name: 'Contact', href: '/contact' },
     ],
   },
   {

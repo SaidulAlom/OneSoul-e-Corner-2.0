@@ -3,17 +3,21 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, BookOpen, Briefcase, Newspaper, GraduationCap } from 'lucide-react';
+import { Menu, X, BookOpen, Briefcase, Newspaper, Home, Play, Layers, Info, Phone } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/icons/logo';
 
 const navItems = [
-  { name: 'Admission', href: '#', icon: GraduationCap },
-  { name: 'Private Jobs', href: '/submit-job', icon: Briefcase },
-  { name: 'News', href: '#', icon: Newspaper },
-  { name: 'Books', href: '#', icon: BookOpen },
+  { name: 'Home', href: '/', icon: Home },
+  { name: 'News', href: '/news', icon: Newspaper },
+  { name: 'Jobs', href: '/jobs', icon: Briefcase },
+  { name: 'Vlogs', href: '/vlogs', icon: Play },
+  { name: 'E-Books', href: '/e-books', icon: BookOpen },
+  { name: 'Services', href: '/services', icon: Layers },
+  { name: 'About', href: '/about', icon: Info },
+  { name: 'Contact', href: '/contact', icon: Phone },
 ];
 
 export default function Header() {
@@ -38,7 +42,7 @@ export default function Header() {
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-2">
+            <nav className="hidden lg:flex items-center space-x-1">
               {navItems.map((item) => (
                 <NavLink key={item.name} href={item.href}>
                   {item.name}
@@ -54,7 +58,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="lg:hidden"
                 onClick={toggleMobileMenu}
                 aria-label="Toggle menu"
               >
