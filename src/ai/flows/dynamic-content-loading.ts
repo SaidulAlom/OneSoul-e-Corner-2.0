@@ -16,7 +16,7 @@ import {z} from 'genkit';
 
 const DynamicContentLoadingInputSchema = z.object({
   userInteractions: z.string().describe('A string containing the history of user interactions, such as clicks, searches, and content views.'),
-  contentType: z.enum(['news', 'jobs', 'learning']).default('news').describe('The type of content to load dynamically.'),
+  contentType: z.enum(['news', 'jobs', 'learning', 'services']).default('news').describe('The type of content to load dynamically.'),
 });
 
 export type DynamicContentLoadingInput = z.infer<typeof DynamicContentLoadingInputSchema>;
@@ -48,6 +48,7 @@ const dynamicContentLoadingPrompt = ai.definePrompt({
   Example of a good listing (news): "Local school board approves new STEM curriculum after community debate."
   Example of a good listing (jobs): "Senior Software Engineer position open at Google; requires 5+ years of experience."
   Example of a good listing (learning): "Introductory course to Python programming now available; learn basic syntax."
+  Example of a good listing (services): "AI-powered resume builder to help you land your dream job."
   `,
 });
 
