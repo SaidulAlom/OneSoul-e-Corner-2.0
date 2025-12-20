@@ -5,6 +5,14 @@ import { dynamicContentLoading, DynamicContentLoadingOutput } from '@/ai/flows/d
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
+const fallbackContent = [
+  'New STEM curriculum approved for local schools.',
+  'Tech giant announces major expansion in the region.',
+  'Virtual career fair scheduled for next month.',
+  'Learn Python with our new introductory course.',
+  'University opens applications for 2025 intake.',
+];
+
 export default function NewsTicker() {
   const [content, setContent] = useState<DynamicContentLoadingOutput['relevantContent'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,14 +20,18 @@ export default function NewsTicker() {
   useEffect(() => {
     async function loadContent() {
       try {
+        // Check for placeholder API key
+        if (process.env.NEXT_PUBLIC_GEMINI_API_KEY === 'YOUR_API_KEY_HERE' || !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+          throw new Error('API key is not configured.');
+        }
         const result = await dynamicContentLoading({
           userInteractions: 'User is interested in technology, higher education, and software development job market trends.',
           contentType: 'news',
         });
         setContent(result.relevantContent);
       } catch (error) {
-        console.error('Failed to load dynamic content:', error);
-        setContent(['Failed to load news updates. Please try again later.']);
+        console.error('Failed to load dynamic content, using fallback:', error);
+        setContent(fallbackContent);
       } finally {
         setIsLoading(false);
       }
