@@ -18,20 +18,27 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     useState<FirebaseServices | null>(null);
 
   useEffect(() => {
-    // Firebase Web SDK is designed to work in the browser.
-    if (typeof window !== 'undefined') {
+    // Only initialize Firebase if the API key is available.
+    // This prevents the app from crashing during development if the .env file is not configured.
+    if (
+      typeof window !== 'undefined' &&
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+    ) {
       try {
         const services = initializeFirebase();
         setFirebaseServices(services);
       } catch (error) {
-        console.error("Firebase initialization failed:", error);
+        console.error(
+          'Firebase initialization failed. Please check your Firebase project configuration.',
+          error
+        );
       }
     }
   }, []);
 
   if (!firebaseServices) {
-    // When firebase is not initialized, we can still render the children.
-    // The parts of the app that depend on Firebase will handle their own state.
+    // When Firebase is not initialized, we can still render the children.
+    // The parts of the app that depend on Firebase will handle their own state or use fallback data.
     return <>{children}</>;
   }
 
