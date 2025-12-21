@@ -30,13 +30,13 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+      <div className="flex flex-col sm:gap-4 sm:py-4">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
           <h1 className="font-headline text-2xl font-bold">Dashboard</h1>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
@@ -111,13 +111,10 @@ export default function AdminDashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Customer</TableHead>
-                      <TableHead className="hidden xl:table-column">
-                        Type
-                      </TableHead>
-                      <TableHead className="hidden xl:table-column">
+                      <TableHead className="hidden sm:table-cell">
                         Status
                       </TableHead>
-                      <TableHead className="hidden xl:table-column">
+                      <TableHead className="hidden md:table-cell">
                         Date
                       </TableHead>
                       <TableHead className="text-right">Amount</TableHead>
@@ -127,19 +124,16 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableCell>
                         <div className="font-medium">Liam Johnson</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
+                        <div className="hidden text-sm text-muted-foreground sm:inline">
                           liam@example.com
                         </div>
                       </TableCell>
-                      <TableCell className="hidden xl:table-column">
-                        Sale
-                      </TableCell>
-                      <TableCell className="hidden xl:table-column">
+                      <TableCell className="hidden sm:table-cell">
                         <Badge className="text-xs" variant="outline">
                           Approved
                         </Badge>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
+                      <TableCell className="hidden md:table-cell">
                         2023-06-23
                       </TableCell>
                       <TableCell className="text-right">$250.00</TableCell>
@@ -147,19 +141,16 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableCell>
                         <div className="font-medium">Olivia Smith</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
+                        <div className="hidden text-sm text-muted-foreground sm:inline">
                           olivia@example.com
                         </div>
                       </TableCell>
-                      <TableCell className="hidden xl:table-column">
-                        Refund
-                      </TableCell>
-                      <TableCell className="hidden xl:table-column">
+                      <TableCell className="hidden sm:table-cell">
                         <Badge className="text-xs" variant="outline">
                           Declined
                         </Badge>
                       </TableCell>
-                      <TableCell className="md:table-cell hidden lg:hidden xl:table-column">
+                      <TableCell className="hidden md:table-cell">
                         2023-06-24
                       </TableCell>
                       <TableCell className="text-right">$150.00</TableCell>
@@ -167,19 +158,16 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableCell>
                         <div className="font-medium">Noah Williams</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
+                        <div className="hidden text-sm text-muted-foreground sm:inline">
                           noah@example.com
                         </div>
                       </TableCell>
-                      <TableCell className="hidden xl:table-column">
-                        Subscription
-                      </TableCell>
-                      <TableCell className="hidden xl:table-column">
+                      <TableCell className="hidden sm:table-cell">
                         <Badge className="text-xs" variant="outline">
                           Approved
                         </Badge>
                       </TableCell>
-                      <TableCell className="md:table-cell hidden lg:hidden xl:table-column">
+                      <TableCell className="hidden md:table-cell">
                         2023-06-25
                       </TableCell>
                       <TableCell className="text-right">$350.00</TableCell>
@@ -194,7 +182,7 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent className="grid gap-8">
                 <div className="flex items-center gap-4">
-                  <Avatar className="hidden h-9 w-9 sm:flex">
+                  <Avatar className="h-9 w-9 sm:flex">
                     <AvatarImage
                       src="https://picsum.photos/seed/person1/100/100"
                       alt="Avatar"
@@ -212,7 +200,7 @@ export default function AdminDashboard() {
                   <div className="ml-auto font-medium">+$1,999.00</div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Avatar className="hidden h-9 w-9 sm:flex">
+                  <Avatar className="h-9 w-9 sm:flex">
                     <AvatarImage
                       src="https://picsum.photos/seed/person2/100/100"
                       alt="Avatar"
@@ -230,7 +218,7 @@ export default function AdminDashboard() {
                   <div className="ml-auto font-medium">+$39.00</div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Avatar className="hidden h-9 w-9 sm:flex">
+                  <Avatar className="h-9 w-9 sm:flex">
                     <AvatarImage
                       src="https://picsum.photos/seed/person3/100/100"
                       alt="Avatar"
