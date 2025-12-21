@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import FirebaseErrorListener from '@/components/FirebaseErrorListener';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -36,10 +38,13 @@ export default function RootLayout({
           fontHeadline.variable
         )}
       >
-        <Header />
-        <main className="relative overflow-hidden">{children}</main>
-        <Footer />
-        <Toaster />
+        <FirebaseClientProvider>
+          <Header />
+          <main className="relative overflow-hidden">{children}</main>
+          <Footer />
+          <Toaster />
+          <FirebaseErrorListener />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
