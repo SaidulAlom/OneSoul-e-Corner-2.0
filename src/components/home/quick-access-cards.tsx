@@ -41,53 +41,6 @@ const cardVariants = {
   }),
 };
 
-const Card3D = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [rect, setRect] = React.useState<DOMRect | null>(null);
-  const [x, setX] = React.useState(0);
-  const [y, setY] = React.useState(0);
-
-  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!rect) return;
-    setX(e.clientX - rect.left);
-    setY(e.clientY - rect.top);
-  };
-
-  const onMouseLeave = () => {
-    setX(0);
-    setY(0);
-  };
-  
-  React.useEffect(() => {
-    if (ref.current) {
-        setRect(ref.current.getBoundingClientRect());
-    }
-  }, []);
-
-  const rotateX = rect ? (y - rect.height / 2) / (rect.height / 2) * -7 : 0;
-  const rotateY = rect ? (x - rect.width / 2) / (rect.width / 2) * 7 : 0;
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      style={{
-        transformStyle: 'preserve-3d',
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-      }}
-      className="transition-transform duration-150 ease-out"
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-
 export default function QuickAccessCards() {
   return (
     <section>
@@ -109,27 +62,24 @@ export default function QuickAccessCards() {
             viewport={{ once: true, amount: 0.3 }}
             variants={cardVariants}
           >
-            <Card3D>
-              <div
-                className="group relative h-full w-full rounded-2xl p-6 overflow-hidden bg-secondary/30 border border-white/10 shadow-lg"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.1),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
-                
-                <div style={{ transform: 'translateZ(20px)' }}>
-                  <div className="mb-4 inline-flex items-center justify-center p-3 rounded-xl bg-primary/20 border border-primary/30">
-                    <card.icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-headline font-semibold text-foreground">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 text-muted-foreground">
-                    {card.description}
-                  </p>
+            <div
+              className="group relative h-full w-full rounded-2xl p-6 overflow-hidden bg-secondary/30 border border-white/10 shadow-lg"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.1),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+              
+              <div>
+                <div className="mb-4 inline-flex items-center justify-center p-3 rounded-xl bg-primary/20 border border-primary/30">
+                  <card.icon className="h-8 w-8 text-primary" />
                 </div>
+                <h3 className="text-2xl font-headline font-semibold text-foreground">
+                  {card.title}
+                </h3>
+                <p className="mt-2 text-muted-foreground">
+                  {card.description}
+                </p>
               </div>
-            </Card3D>
+            </div>
           </motion.div>
         ))}
       </div>
