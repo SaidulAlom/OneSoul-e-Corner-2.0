@@ -20,14 +20,19 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Firebase Web SDK is designed to work in the browser.
     if (typeof window !== 'undefined') {
-      const services = initializeFirebase();
-      setFirebaseServices(services);
+      try {
+        const services = initializeFirebase();
+        setFirebaseServices(services);
+      } catch (error) {
+        console.error("Firebase initialization failed:", error);
+      }
     }
   }, []);
 
   if (!firebaseServices) {
-    // You can return a loader here if needed
-    return null;
+    // You can return a loader here if needed, or nothing to not block the page.
+    // For now, we render children to allow the rest of the app to display.
+    return <>{children}</>;
   }
 
   return (
