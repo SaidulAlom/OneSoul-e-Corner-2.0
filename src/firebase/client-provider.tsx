@@ -30,8 +30,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   }, []);
 
   if (!firebaseServices) {
-    // You can return a loader here if needed, or nothing to not block the page.
-    // For now, we render children to allow the rest of the app to display.
+    // When firebase is not initialized, we can still render the children.
+    // The parts of the app that depend on Firebase will handle their own state.
     return <>{children}</>;
   }
 
