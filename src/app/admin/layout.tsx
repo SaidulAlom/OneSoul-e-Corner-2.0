@@ -32,6 +32,7 @@ import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
+  SidebarMenuBadge,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
