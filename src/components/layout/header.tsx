@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, BookOpen, Briefcase, Newspaper, Home, Play, Layers, Info, Phone, Shield } from 'lucide-react';
+import { Menu, X, BookOpen, Briefcase, Newspaper, Home, Play, Layers, Info, Phone } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ const navItems = [
   { name: 'Services', href: '/services', icon: Layers },
   { name: 'About', href: '/about', icon: Info },
   { name: 'Contact', href: '/contact', icon: Phone },
-  { name: 'Admin', href: '/admin', icon: Shield },
 ];
 
 export default function Header() {
