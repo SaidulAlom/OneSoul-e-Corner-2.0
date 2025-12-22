@@ -39,13 +39,7 @@ const footerLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative w-full bg-background border-t border-white/10 overflow-hidden py-16">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl opacity-50 animate-blob"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-secondary/10 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
-      </div>
-
+    <footer className="relative w-full bg-background border-t py-16">
       <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
           <div className="col-span-1 lg:col-span-2">
@@ -91,7 +85,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/10 text-center text-muted-foreground text-sm">
+        <div className="mt-16 pt-8 border-t text-center text-muted-foreground text-sm">
           <p>&copy; {new Date().getFullYear()} NexusEd. All rights reserved.</p>
         </div>
       </div>

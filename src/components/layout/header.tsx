@@ -48,7 +48,7 @@ export default function Header() {
 
             <nav className="hidden lg:flex items-center space-x-1">
               {navItems.map((item) => (
-                <NavLink key={item.name} href={item.href}>
+                <NavLink key={item.name} href={item.href} isActive={pathname === item.href}>
                   {item.name}
                 </NavLink>
               ))}
@@ -90,7 +90,7 @@ export default function Header() {
               <div className="flex justify-between items-center py-4">
                  <Link href="/" className="flex items-center space-x-2" onClick={toggleMobileMenu}>
                     <Logo className="h-8 w-8" />
-                    <span className="font-headline text-xl font-bold text-white">
+                    <span className="font-headline text-xl font-bold text-foreground">
                       NexusEd
                     </span>
                   </Link>
@@ -110,7 +110,7 @@ export default function Header() {
                       <Link
                         href={item.href}
                         onClick={toggleMobileMenu}
-                        className="flex items-center gap-4 text-3xl font-headline text-foreground/80 hover:text-primary transition-colors"
+                        className={cn("flex items-center gap-4 text-3xl font-headline transition-colors", pathname === item.href ? "text-primary" : "text-foreground/80 hover:text-primary")}
                       >
                         <item.icon className="h-8 w-8" />
                         {item.name}
@@ -135,16 +135,25 @@ export default function Header() {
   );
 }
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+const NavLink = ({ href, children, isActive }: { href: string; children: React.ReactNode; isActive: boolean }) => {
   return (
     <Link
       href={href}
-      className="relative group px-3 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors duration-300"
+      className={cn(
+        "relative group px-3 py-2 text-sm font-medium hover:text-white transition-colors duration-300",
+        isActive ? "text-white" : "text-slate-300"
+      )}
     >
-      <span className="relative z-10 group-hover:-translate-y-0.5 transition-transform duration-300">
+      <span className="relative z-10">
         {children}
       </span>
-      <span className="absolute bottom-1 left-1/2 w-full h-0.5 bg-primary origin-bottom-left transform -translate-x-1/2 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+      {isActive && (
+         <motion.span 
+            layoutId="nav-underline"
+            className="absolute bottom-0 left-0 w-full h-0.5 bg-primary" 
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        />
+      )}
     </Link>
   );
 };

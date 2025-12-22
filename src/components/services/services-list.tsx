@@ -1,103 +1,128 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
-  dynamicContentLoading,
-  DynamicContentLoadingOutput,
-} from '@/ai/flows/dynamic-content-loading';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Layers } from 'lucide-react';
-import { motion } from 'framer-motion';
+  Briefcase,
+  GraduationCap,
+  Award,
+  FileText,
+  Shield,
+  CreditCard,
+  FileSignature,
+  Car,
+  Newspaper,
+  Wrench,
+} from 'lucide-react';
+import { Button } from '../ui/button';
 
-const fallbackContent = [
-  'AI-Powered Resume Builder: Craft the perfect resume to land your dream job.',
-  'Personalized Career Coaching: Get one-on-one guidance from industry experts.',
-  'Mock Interview Platform: Practice and perfect your interview skills with AI feedback.',
-  'Skill Assessment & Gap Analysis: Identify your strengths and areas for improvement.',
-  'University Application Assistance: Navigate the complex application process with ease.',
-  'Scholarship & Grant Finder: Discover funding opportunities for your education.',
-  'Networking Event Connector: Connect with professionals in your desired field.',
-  'Project-Based Learning Modules: Gain hands-on experience with real-world projects.',
+const services = [
+  {
+    icon: GraduationCap,
+    title: 'Admission Consultancy',
+    subtitle: 'Form fill-up / Apply',
+    features: ['IGNOU', 'NIOS', 'Universities', '+5 more services'],
+  },
+  {
+    icon: Award,
+    title: 'Scholarship',
+    subtitle: 'Apply',
+    features: ['NSP', 'Umbrella Scholarships', 'Stipend'],
+  },
+  {
+    icon: Shield,
+    title: 'Insurance Services',
+    subtitle: 'Motor Insurance, Health Insurance',
+    features: ['Bike', 'Car', 'Pick Up', '+2 more services'],
+  },
+  {
+    icon: FileText,
+    title: 'Entrance Exam',
+    subtitle: 'Form Fill Up',
+    features: ['NEET', 'IIT', 'NIT', '+5 more services'],
+  },
+  {
+    icon: Briefcase,
+    title: 'Job and Requirement Test',
+    subtitle: 'Form Fill Up / Online Apply',
+    features: ['APSSB', 'APPSC', 'UP Police', '+6 more services'],
+  },
+  {
+    icon: Briefcase,
+    title: 'Job and Placement',
+    subtitle: 'Office of the placement, Resume, Bio-data, CV',
+    features: [],
+  },
+  {
+    icon: CreditCard,
+    title: 'PAN Card and Election Card',
+    subtitle: 'Apply',
+    features: [],
+  },
+  {
+    icon: FileSignature,
+    title: 'Income Tax Return (ITR)',
+    subtitle: 'Fill Up',
+    features: [],
+  },
+  {
+    icon: Newspaper,
+    title: 'GST Registration',
+    subtitle: 'New GST Apply',
+    features: [],
+  },
+  {
+    icon: Car,
+    title: 'Driving License',
+    subtitle: 'LL Apply, DL Apply',
+    features: ['Form Fill Up', 'Challan', 'Documents Management'],
+  },
+  {
+    icon: Wrench,
+    title: 'new',
+    subtitle: 'sadasdasd',
+    features: ['asdasdasd', 'asdasdasddas'],
+  },
 ];
 
 export default function ServicesList() {
-  const [content, setContent] = useState<
-    DynamicContentLoadingOutput['relevantContent'] | null
-  >(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadContent() {
-      setIsLoading(true);
-      try {
-        const result = await dynamicContentLoading({
-          userInteractions:
-            'User has shown interest in career development, university applications, and skill-building.',
-          contentType: 'services',
-        });
-
-        if (result && result.relevantContent && result.relevantContent.length > 0) {
-          setContent(result.relevantContent);
-        } else {
-          throw new Error('AI returned no content.');
-        }
-      } catch (error) {
-        console.error('Failed to load dynamic content, using fallback:', error);
-        setContent(fallbackContent);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadContent();
-  }, []);
-
   return (
-    <div className="space-y-6">
-      {isLoading
-        ? Array.from({ length: 5 }).map((_, i) => (
-            <Card
-              key={i}
-              className="bg-secondary/20 border-white/10 p-4"
-            >
-              <CardHeader className="flex flex-row items-center gap-4 p-2">
-                <Skeleton className="w-10 h-10 rounded-lg" />
-                <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-4/5 rounded-md" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      {services.map((service, index) => (
+        <div key={index} className="bg-card text-card-foreground rounded-lg border shadow-sm p-6 flex flex-col">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="bg-primary/10 p-3 rounded-lg">
+                <service.icon className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+                <h3 className="font-bold text-lg">{service.title}</h3>
+                <p className="text-sm text-muted-foreground">{service.subtitle}</p>
+            </div>
+          </div>
+          
+          <div className="flex-grow space-y-4">
+            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300">
+              Starting at ₹?
+            </div>
+
+            {service.features.length > 0 && (
+                <div>
+                    <h4 className="font-semibold text-sm mb-2">Services Included:</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                        {service.features.map((feature, fIndex) => (
+                            <li key={fIndex} className="flex items-center">
+                                <span className="text-primary mr-2">•</span>
+                                {feature}
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-              </CardHeader>
-              <CardContent className="p-2 pt-0">
-                <Skeleton className="h-4 w-full rounded-md" />
-                <Skeleton className="h-4 w-1/2 rounded-md mt-2" />
-              </CardContent>
-            </Card>
-          ))
-        : content?.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300">
-                <CardHeader className="flex flex-row items-start gap-4">
-                  <div className="p-3 rounded-xl bg-primary/20 border border-primary/30">
-                    <Layers className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-foreground">
-                      {item.split(': ')[0]}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    {item.split(': ')[1] || item}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+            )}
+          </div>
+
+          <div className="mt-6">
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">View Details & Apply</Button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
