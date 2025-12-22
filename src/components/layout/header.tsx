@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X, BookOpen, Briefcase, Newspaper, Home, Play, Layers, Info, Phone, Shield } from 'lucide-react';
 
@@ -23,8 +24,11 @@ const navItems = [
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+  const showAuthButtons = pathname.startsWith('/admin');
 
   return (
     <>
@@ -52,10 +56,14 @@ export default function Header() {
             </nav>
 
             <div className="flex items-center">
-              <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign In</Button>
-              <Button size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
-                Sign Up
-              </Button>
+              {showAuthButtons && (
+                <>
+                  <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign In</Button>
+                  <Button size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                    Sign Up
+                  </Button>
+                </>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -111,12 +119,14 @@ export default function Header() {
                     </motion.li>
                   ))}
                 </ul>
-                <div className="absolute bottom-16 flex gap-4">
-                  <Button variant="outline" size="lg">Sign In</Button>
-                  <Button size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
-                    Sign Up
-                  </Button>
-                </div>
+                {showAuthButtons && (
+                  <div className="absolute bottom-16 flex gap-4">
+                    <Button variant="outline" size="lg">Sign In</Button>
+                    <Button size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                      Sign Up
+                    </Button>
+                  </div>
+                )}
               </nav>
             </div>
           </motion.div>
