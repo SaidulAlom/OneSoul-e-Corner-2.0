@@ -19,8 +19,8 @@ export default function NewsTicker() {
 
   useEffect(() => {
     async function loadContent() {
+      setIsLoading(true);
       try {
-        // We'll optimistically try to fetch content. The flow will handle the API key error.
         const result = await dynamicContentLoading({
           userInteractions: 'User is interested in technology, higher education, and software development job market trends.',
           contentType: 'news',
@@ -29,7 +29,6 @@ export default function NewsTicker() {
         if (result && result.relevantContent && result.relevantContent.length > 0) {
           setContent(result.relevantContent);
         } else {
-          // The AI might return empty content, so we fall back.
           throw new Error("AI returned no content.");
         }
       } catch (error) {
