@@ -7,17 +7,21 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { Newspaper } from 'lucide-react';
+import { ArrowRight, Newspaper } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import Image from 'next/image';
+import Link from 'next/link';
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { NewsArticle } from '@/lib/types';
+import { Button } from '../ui/button';
 
 // Helper to convert Firestore Timestamp to a readable string or Date
 const formatPublicationDate = (publicationDate: any) => {
@@ -42,24 +46,38 @@ function NewsArticleItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300">
-        <CardHeader className="flex flex-row items-start gap-4">
-          <div className="p-3 rounded-xl bg-primary/20 border border-primary/30">
-            <Newspaper className="w-6 h-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-foreground">
-              {article.title}
-            </CardTitle>
-            <div className="text-sm text-muted-foreground mt-1">
-              <span>{article.author}</span> &middot;{' '}
-              <span>{formatPublicationDate(article.publicationDate)}</span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{article.content}</p>
-        </CardContent>
+      <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300 flex flex-col sm:flex-row gap-6 p-6">
+        <div className="relative w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
+          <Image
+            src={article.imageUrl}
+            alt={article.title}
+            fill
+            className="object-cover rounded-md"
+          />
+        </div>
+        <div className="flex-1 flex flex-col">
+            <CardHeader className="p-0">
+                <p className="text-sm text-muted-foreground mb-1">
+                  <span>{article.category}</span> &middot;{' '}
+                  <span>{formatPublicationDate(article.publicationDate)}</span>
+                </p>
+                <CardTitle className="text-xl font-semibold text-foreground leading-tight">
+                    <Link href={`/news/${article.id}`} className="hover:text-primary transition-colors">
+                        {article.title}
+                    </Link>
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 mt-3 flex-grow">
+                <p className="text-muted-foreground line-clamp-3">{article.content}</p>
+            </CardContent>
+            <CardFooter className="p-0 mt-4">
+                <Button asChild variant="link" className="p-0 h-auto text-primary hover:text-accent">
+                    <Link href={`/news/${article.id}`}>
+                        Read More <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </CardFooter>
+        </div>
       </Card>
     </motion.div>
   );
@@ -93,21 +111,21 @@ export default function NewsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {isLoading &&
-        Array.from({ length: 5 }).map((_, i) => (
-          <Card key={i} className="bg-secondary/20 border-white/10 p-4">
-            <CardHeader className="flex flex-row items-center gap-4 p-2">
-              <Skeleton className="w-10 h-10 rounded-lg" />
-              <div className="space-y-2 flex-1">
-                <Skeleton className="h-5 w-4/5 rounded-md" />
-                <Skeleton className="h-4 w-1/2 rounded-md" />
+        Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} className="flex flex-col sm:flex-row gap-6 p-6 bg-secondary/20 border-white/10">
+              <Skeleton className="w-full sm:w-48 h-48 sm:h-auto rounded-md flex-shrink-0" />
+              <div className="flex-1 space-y-4">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-6 w-full" />
+                  <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                  </div>
+                  <Skeleton className="h-6 w-28" />
               </div>
-            </CardHeader>
-            <CardContent className="p-2 pt-0">
-              <Skeleton className="h-4 w-full rounded-md" />
-              <Skeleton className="h-4 w-2/3 rounded-md mt-2" />
-            </CardContent>
           </Card>
         ))}
 
@@ -118,7 +136,8 @@ export default function NewsList() {
       
       {!isLoading && articles?.length === 0 && (
         <div className="text-center py-10 px-4 bg-secondary/20 rounded-lg">
-            <h3 className="text-xl font-semibold">No News... Yet!</h3>
+            <Newspaper className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-xl font-semibold">No News... Yet!</h3>
             <p className="text-muted-foreground mt-2">Check back soon for the latest updates.</p>
         </div>
       )}
