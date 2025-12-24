@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <main className="relative overflow-hidden">{children}</main>
+          <main className="relative overflow-hidden pt-24">{children}</main>
           <Footer />
           <Toaster />
         </Providers>
