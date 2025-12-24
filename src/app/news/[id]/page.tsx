@@ -63,6 +63,15 @@ export default function NewsArticlePage() {
     );
   }
 
+  // Fallback for invalid image URLs in existing data
+  let imageUrl = article.imageUrl;
+  const invalidUrl = 'https://share.google/NAhSwqWsCY9tHvMmR';
+  if (imageUrl === invalidUrl || !imageUrl) {
+    // Generate a consistent placeholder based on the article ID
+    const seed = article.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    imageUrl = `https://picsum.photos/seed/${seed}/1280/720`;
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-16 bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto max-w-3xl px-4">
@@ -89,7 +98,7 @@ export default function NewsArticlePage() {
 
           <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden mb-8 shadow-2xl shadow-black/30">
             <Image 
-                src={article.imageUrl}
+                src={imageUrl}
                 alt={article.title}
                 fill
                 className="object-cover"
