@@ -27,7 +27,7 @@ export default function Header() {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const showAuthButtons = !pathname.startsWith('/admin') && pathname !== '/login';
+  const showAuthButtons = !pathname.startsWith('/admin') && pathname !== '/login' && pathname !== '/signup';
 
   return (
     <>
@@ -60,8 +60,8 @@ export default function Header() {
                   <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-white/10 hover:text-white">
                     <Link href="/login">Sign In</Link>
                   </Button>
-                  <Button size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
-                    Sign Up
+                  <Button asChild size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                    <Link href="/signup">Sign Up</Link>
                   </Button>
                 </>
               )}
@@ -125,8 +125,8 @@ export default function Header() {
                     <Button asChild variant="outline" size="lg">
                       <Link href="/login">Sign In</Link>
                     </Button>
-                    <Button size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
-                      Sign Up
+                    <Button asChild size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
+                      <Link href="/signup">Sign Up</Link>
                     </Button>
                   </div>
                 )}
