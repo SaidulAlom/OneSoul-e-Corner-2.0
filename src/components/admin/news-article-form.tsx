@@ -35,6 +35,8 @@ import {
     SelectTrigger,
     SelectValue,
   } from '@/components/ui/select';
+import React, { useState } from 'react';
+import Image from 'next/image';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -54,12 +56,13 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
   const router = useRouter();
   const firestore = useFirestore();
   const isEditMode = !!article;
+  const [contentImagePreview, setContentImagePreview] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: article?.title || '',
-      content: article?.content || '',
+      content: article?.content || 'Placeholder content for image upload simulation.',
       author: article?.author || '',
       category: article?.category || '',
       status: article?.status || 'New',
@@ -70,7 +73,11 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) return;
-
+    
+    // In a real app, you'd upload the file from the file input,
+    // get the URL, and set it as values.content before saving.
+    // For now, we're just submitting the form as is.
+    
     if (isEditMode && article.id) {
       const articleRef = doc(firestore, 'news_articles', article.id);
       updateDocumentNonBlocking(articleRef, {
@@ -86,6 +93,20 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
     }
     router.push('/admin/news');
   }
+
+  const handleContentImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setContentImagePreview(reader.result as string);
+        // Here you would typically use a file upload service
+        // and then set the returned URL to the form value.
+        // form.setValue('content', 'url-from-upload-service');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -103,23 +124,23 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Write the article content here..."
-                  className="h-48"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
+        <FormItem>
+            <FormLabel>Content</FormLabel>
+            <FormControl>
+                <Input type="file" accept="image/*" onChange={handleContentImageChange} className="file:text-foreground"/>
+            </FormControl>
+            <FormDescription>
+                Upload an image for the main content from your local storage.
+            </FormDescription>
+            {contentImagePreview && (
+                <div className="mt-4 relative w-full h-64 rounded-md border-2 border-dashed border-muted-foreground flex items-center justify-center">
+                    <Image src={contentImagePreview} alt="Content preview" fill className="object-contain rounded-md" />
+                </div>
+            )}
+            <FormMessage />
+        </FormItem>
+
         <div className="grid md:grid-cols-2 gap-8">
           <FormField
             control={form.control}
