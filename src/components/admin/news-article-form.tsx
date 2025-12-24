@@ -44,8 +44,8 @@ const formSchema = z.object({
   author: z.string().min(2, 'Author is required.'),
   category: z.string().min(2, 'Category is required.'),
   status: z.enum(['New', 'Urgent', 'Standard']),
-  heroImageUrl: z.string().url('Please enter a valid URL for the hero image.'),
-  thumbnailImageUrl: z.string().url('Please enter a valid URL for the thumbnail image.'),
+  heroImageUrl: z.any().refine(val => val, { message: 'Hero image is required.'}),
+  thumbnailImageUrl: z.any().refine(val => val, { message: 'Thumbnail image is required.'}),
 });
 
 interface NewsArticleFormProps {
@@ -56,13 +56,14 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
   const router = useRouter();
   const firestore = useFirestore();
   const isEditMode = !!article;
-  const [contentImagePreview, setContentImagePreview] = useState<string | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(article?.heroImageUrl || null);
+  const [thumbnailImagePreview, setThumbnailImagePreview] = useState<string | null>(article?.thumbnailImageUrl || null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: article?.title || '',
-      content: article?.content || 'Placeholder content for image upload simulation.',
+      content: article?.content || '',
       author: article?.author || '',
       category: article?.category || '',
       status: article?.status || 'New',
@@ -74,35 +75,45 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) return;
     
-    // In a real app, you'd upload the file from the file input,
-    // get the URL, and set it as values.content before saving.
-    // For now, we're just submitting the form as is.
+    // In a real app, you'd upload the files from the file inputs,
+    // get their URLs from a storage service (like Firebase Storage),
+    // and then set those URLs as values.heroImageUrl and values.thumbnailImageUrl
+    // before saving to Firestore.
+    // For this UI simulation, we're just using the preview URLs (or existing ones).
+    const dataToSave = {
+        ...values,
+        heroImageUrl: heroImagePreview || values.heroImageUrl,
+        thumbnailImageUrl: thumbnailImagePreview || values.thumbnailImageUrl
+    };
     
     if (isEditMode && article.id) {
       const articleRef = doc(firestore, 'news_articles', article.id);
       updateDocumentNonBlocking(articleRef, {
-        ...values,
-        publicationDate: serverTimestamp(), // Or keep existing date
+        ...dataToSave,
+        publicationDate: article.publicationDate, // Keep existing date on edit
       });
     } else {
       const collectionRef = collection(firestore, 'news_articles');
       addDocumentNonBlocking(collectionRef, {
-        ...values,
+        ...dataToSave,
         publicationDate: serverTimestamp(),
       });
     }
     router.push('/admin/news');
   }
 
-  const handleContentImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<string | null>>,
+    fieldName: 'heroImageUrl' | 'thumbnailImageUrl'
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setContentImagePreview(reader.result as string);
-        // Here you would typically use a file upload service
-        // and then set the returned URL to the form value.
-        // form.setValue('content', 'url-from-upload-service');
+        const result = reader.result as string;
+        setter(result);
+        form.setValue(fieldName, result); // Set value for validation
       };
       reader.readAsDataURL(file);
     }
@@ -125,21 +136,23 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
           )}
         />
         
-        <FormItem>
-            <FormLabel>Content</FormLabel>
-            <FormControl>
-                <Input type="file" accept="image/*" onChange={handleContentImageChange} className="file:text-foreground"/>
-            </FormControl>
-            <FormDescription>
-                Upload an image for the main content from your local storage.
-            </FormDescription>
-            {contentImagePreview && (
-                <div className="mt-4 relative w-full h-64 rounded-md border-2 border-dashed border-muted-foreground flex items-center justify-center">
-                    <Image src={contentImagePreview} alt="Content preview" fill className="object-contain rounded-md" />
-                </div>
-            )}
-            <FormMessage />
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Content</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Write the full article content here..."
+                  className="h-48"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="grid md:grid-cols-2 gap-8">
           <FormField
@@ -169,8 +182,8 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
             )}
           />
         </div>
-        <div className="grid md:grid-cols-2 gap-8">
-            <FormField
+        
+        <FormField
             control={form.control}
             name="status"
             render={({ field }) => (
@@ -191,40 +204,54 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
                 <FormMessage />
                 </FormItem>
             )}
-            />
+        />
+        
+        <div className="grid md:grid-cols-2 gap-8">
             <FormField
             control={form.control}
             name="thumbnailImageUrl"
             render={({ field }) => (
-                <FormItem>
-                <FormLabel>Thumbnail Image URL</FormLabel>
-                <FormControl>
-                    <Input placeholder="https://example.com/thumbnail.png" {...field} />
-                </FormControl>
-                <FormDescription>
-                    Image for list views (aspect ratio 16:9).
-                </FormDescription>
-                <FormMessage />
+                 <FormItem>
+                    <FormLabel>Thumbnail Image</FormLabel>
+                    <FormControl>
+                        <Input type="file" accept="image/*" onChange={(e) => handleImageChange(e, setThumbnailImagePreview, 'thumbnailImageUrl')} className="file:text-foreground"/>
+                    </FormControl>
+                    <FormDescription>
+                        Upload a thumbnail for list views (16:9 ratio recommended).
+                    </FormDescription>
+                    {thumbnailImagePreview && (
+                        <div className="mt-4 relative aspect-video w-full rounded-md border-2 border-dashed border-muted-foreground flex items-center justify-center">
+                            <Image src={thumbnailImagePreview} alt="Thumbnail preview" fill className="object-contain rounded-md" />
+                        </div>
+                    )}
+                    <FormMessage />
                 </FormItem>
             )}
             />
-        </div>
-        <FormField
+
+            <FormField
             control={form.control}
             name="heroImageUrl"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Hero Image URL</FormLabel>
-                <FormControl>
-                    <Input placeholder="https://example.com/hero-image.png" {...field} />
-                </FormControl>
-                <FormDescription>
-                    Large image for the top of the article page.
-                </FormDescription>
-                <FormMessage />
+                    <FormLabel>Hero Image</FormLabel>
+                    <FormControl>
+                        <Input type="file" accept="image/*" onChange={(e) => handleImageChange(e, setHeroImagePreview, 'heroImageUrl')} className="file:text-foreground"/>
+                    </FormControl>
+                    <FormDescription>
+                        Upload a large hero image for the article page.
+                    </FormDescription>
+                    {heroImagePreview && (
+                        <div className="mt-4 relative aspect-video w-full rounded-md border-2 border-dashed border-muted-foreground flex items-center justify-center">
+                            <Image src={heroImagePreview} alt="Hero preview" fill className="object-contain rounded-md" />
+                        </div>
+                    )}
+                    <FormMessage />
                 </FormItem>
             )}
             />
+        </div>
+
         <div className="flex gap-4">
             <Button type="submit">
                 {isEditMode ? 'Update Article' : 'Create Article'}
