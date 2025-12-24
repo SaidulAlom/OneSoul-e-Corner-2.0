@@ -35,7 +35,7 @@ export default function AdminDashboard() {
           <SidebarTrigger className="sm:hidden" />
           <h1 className="font-headline text-2xl font-bold">Dashboard</h1>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 md:gap-8 pt-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
