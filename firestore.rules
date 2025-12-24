@@ -10,6 +10,7 @@
  * Core Philosophy:
  * - Public Read Access: All users, including unauthenticated visitors, can read content.
  * - Admin-Only Writes: Only administrators can create, update, or delete content.
+ * - Authenticated users can create content.
  *
  * Data Structure:
  * - /news_articles, /job_postings, /vlogs, /ebooks, /services: Content collections.
@@ -47,27 +48,32 @@ service cloud.firestore {
 
     match /news_articles/{articleId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     match /job_postings/{jobId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     match /vlogs/{vlogId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     match /ebooks/{ebookId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     match /services/{serviceId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     // ------------------------------------------------------------------------
