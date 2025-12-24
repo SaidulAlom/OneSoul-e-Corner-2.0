@@ -5,6 +5,7 @@ import {
   Bell,
   Home,
   LineChart,
+  Newspaper,
   Package,
   Package2,
   Settings,
@@ -36,12 +37,14 @@ import {
 } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { usePathname } from 'next/navigation';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   return (
     <SidebarProvider>
       <Sidebar>
@@ -56,9 +59,15 @@ export default function AdminLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin" isActive>
+              <SidebarMenuButton href="/admin" isActive={pathname === '/admin'}>
                 <Home />
                 <span>Dashboard</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton href="/admin/news" isActive={pathname.startsWith('/admin/news')}>
+                <Newspaper />
+                <span>News</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
