@@ -35,8 +35,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // This is a more robust check for admin privileges.
+    // It fetches the user's role document and checks if 'isAdmin' is true.
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true;
     }
 
     // ------------------------------------------------------------------------

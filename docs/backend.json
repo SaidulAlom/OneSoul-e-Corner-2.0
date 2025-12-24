@@ -75,7 +75,7 @@
        "properties": {
           "isAdmin": {
             "type": "boolean",
-            "const": true
+            "description": "Must be true to grant admin rights."
           }
        },
        "required": ["isAdmin"]
