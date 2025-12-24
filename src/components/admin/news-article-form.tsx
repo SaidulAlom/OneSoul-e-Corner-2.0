@@ -62,7 +62,7 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
       author: article?.author || '',
       category: article?.category || '',
       status: article?.status || 'New',
-      imageUrl: article?.imageUrl || '',
+      imageUrl: article?.imageUrl || `https://picsum.photos/seed/${Math.random()}/1280/720`,
     },
   });
 
