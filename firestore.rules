@@ -40,33 +40,13 @@ service cloud.firestore {
     }
 
     // ------------------------------------------------------------------------
-    // Generic Content Collection Rules
+    // Public Content Collections
     // ------------------------------------------------------------------------
 
-    function publicReadAdminWrite() {
-      return {
-        allow get: if true,
-        allow list: if true,
-        allow create: if isAdmin(),
-        allow update: if isAdmin() && resource != null,
-        allow delete: if isAdmin() && resource != null
-      };
-    }
-
-    match /news_articles/{docId} {
-      rules: publicReadAdminWrite()
-    }
-    match /job_postings/{docId} {
-      rules: publicReadAdminWrite()
-    }
-    match /vlogs/{docId} {
-      rules: publicReadAdminWrite()
-    }
-    match /ebooks/{docId} {
-      rules: publicReadAdminWrite()
-    }
-    match /services/{docId} {
-      rules: publicReadAdminWrite()
+    match /{collection}/{docId}
+      where collection in ['news_articles', 'job_postings', 'vlogs', 'ebooks', 'services'] {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ------------------------------------------------------------------------
