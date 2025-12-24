@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "NewsArticle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsArticle",
+      "type": "object",
+      "description": "Represents a news article on the platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the NewsArticle entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the news article."
+        },
+        "content": {
+          "type": "string",
+          "description": "The main content of the news article."
+        },
+        "author": {
+          "type": "string",
+          "description": "The author of the news article."
+        },
+        "publicationDate": {
+          "type": "string",
+          "description": "The date and time the news article was published.",
+          "format": "date-time"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image associated with the news article.",
+          "format": "uri"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the news article (e.g., Education, Jobs)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the news article (e.g., 'New', 'Urgent')."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "content",
+        "author",
+        "publicationDate",
+        "imageUrl",
+        "category",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/news_articles/{newsArticleId}",
+        "definition": {
+          "entityName": "NewsArticle",
+          "schema": {
+            "$ref": "#/backend/entities/NewsArticle"
+          },
+          "description": "Stores news articles. Only accessible and updatable by admins.",
+          "params": [
+            {
+              "name": "newsArticleId",
+              "description": "Unique identifier for each news article."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{uid}",
+        "definition": {
+          "entityName": "adminRole",
+          "schema": {
+            "$ref": "#/backend/entities/adminRole"
+          },
+          "description": "Documents in this collection grant admin privileges. Existence of a document for a user ID confers admin rights.",
+          "params": [
+            {
+              "name": "uid",
+              "description": "The Firebase Auth UID of the administrator."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This design prioritizes security and scalability for managing news articles. It leverages Structural Segregation by placing all news articles in a single collection, `/news_articles`, ensuring a homogeneous security posture. Access is controlled via a dedicated `/roles_admin/{uid}` collection. Only users with a document in that collection are considered administrators. This structure avoids hierarchical authorization dependencies, making security rules simpler and more robust. Since the news articles data only requires admin access to update, Authorization Independence is not applicable."
+  }
+}
