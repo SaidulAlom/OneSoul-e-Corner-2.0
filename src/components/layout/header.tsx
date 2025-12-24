@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X, BookOpen, Briefcase, Newspaper, Home, Play, Layers, Info, Phone } from 'lucide-react';
@@ -23,11 +23,20 @@ const navItems = [
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const showAuthButtons = !pathname.startsWith('/admin') && pathname !== '/login' && pathname !== '/signup';
+
+  const navbarClasses = isMounted
+    ? 'bg-background/50 backdrop-blur-lg'
+    : 'bg-background';
 
   return (
     <>
@@ -38,10 +47,15 @@ export default function Header() {
         )}
       >
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
-          <div className="flex items-center justify-between rounded-full bg-black/30 backdrop-blur-lg border border-white/10 px-4 py-2 shadow-2xl shadow-primary/10">
+          <div
+            className={cn(
+              'flex items-center justify-between rounded-full border border-foreground/10 px-4 py-2 shadow-2xl shadow-primary/10',
+              navbarClasses
+            )}
+          >
             <Link href="/" className="flex items-center space-x-2">
               <Logo className="h-8 w-8 animate-[breathe_4s_ease-in-out_infinite]" />
-              <span className="font-headline text-xl font-bold text-white">
+              <span className="font-headline text-xl font-bold text-foreground">
                 NexusEd
               </span>
             </Link>
@@ -57,7 +71,7 @@ export default function Header() {
             <div className="flex items-center">
               {showAuthButtons && (
                 <>
-                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-white/10 hover:text-white">
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-foreground hover:bg-foreground/10 hover:text-foreground">
                     <Link href="/login">Sign In</Link>
                   </Button>
                   <Button asChild size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
@@ -68,7 +82,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-white hover:bg-white/10 hover:text-white"
+                className="lg:hidden text-foreground hover:bg-foreground/10 hover:text-foreground"
                 onClick={toggleMobileMenu}
                 aria-label="Toggle menu"
               >
@@ -144,17 +158,17 @@ const NavLink = ({ href, children, isActive }: { href: string; children: React.R
     <Link
       href={href}
       className={cn(
-        "relative group px-3 py-2 text-sm font-medium hover:text-white transition-colors duration-300",
-        isActive ? "text-white" : "text-slate-300"
+        "relative group px-3 py-2 text-sm font-medium hover:text-foreground transition-colors duration-300",
+        isActive ? "text-foreground" : "text-foreground/70"
       )}
     >
       <span className="relative z-10">
         {children}
       </span>
       {isActive && (
-         <motion.span 
+         <motion.span
             layoutId="nav-underline"
-            className="absolute bottom-0 left-0 w-full h-0.5 bg-primary" 
+            className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}
