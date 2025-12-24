@@ -27,7 +27,7 @@ export default function Header() {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const showAuthButtons = pathname.startsWith('/admin');
+  const showAuthButtons = !pathname.startsWith('/admin') && pathname !== '/login';
 
   return (
     <>
@@ -57,7 +57,9 @@ export default function Header() {
             <div className="flex items-center">
               {showAuthButtons && (
                 <>
-                  <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign In</Button>
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-white hover:bg-white/10 hover:text-white">
+                    <Link href="/login">Sign In</Link>
+                  </Button>
                   <Button size="sm" className="hidden md:inline-flex ml-2 bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
                     Sign Up
                   </Button>
@@ -66,7 +68,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden text-white hover:bg-white/10 hover:text-white"
                 onClick={toggleMobileMenu}
                 aria-label="Toggle menu"
               >
@@ -120,7 +122,9 @@ export default function Header() {
                 </ul>
                 {showAuthButtons && (
                   <div className="absolute bottom-16 flex gap-4">
-                    <Button variant="outline" size="lg">Sign In</Button>
+                    <Button asChild variant="outline" size="lg">
+                      <Link href="/login">Sign In</Link>
+                    </Button>
                     <Button size="lg" className="bg-primary/80 hover:bg-primary text-primary-foreground rounded-full shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] transition-shadow">
                       Sign Up
                     </Button>
