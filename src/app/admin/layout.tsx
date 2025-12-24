@@ -9,7 +9,11 @@ import {
   BookOpen,
   Layers,
   Settings,
+  LogOut,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '@/firebase';
 
 import {
   Sidebar,
@@ -32,6 +36,18 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out: ', error);
+    }
+  };
+
   return (
     <AuthGuard>
       <SidebarProvider>
@@ -106,6 +122,15 @@ export default function AdminLayout({
                   <Settings />
                   <span>Settings</span>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <button
+                  onClick={handleLogout}
+                  className="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 h-8 text-sm"
+                >
+                  <LogOut />
+                  <span>Logout</span>
+                </button>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
