@@ -135,7 +135,7 @@ export default function AdminLayout({
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset>{children}</SidebarInset>
+        <SidebarInset className="pt-0">{children}</SidebarInset>
       </SidebarProvider>
     </AuthGuard>
   );
