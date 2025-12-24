@@ -42,7 +42,8 @@ const formSchema = z.object({
   author: z.string().min(2, 'Author is required.'),
   category: z.string().min(2, 'Category is required.'),
   status: z.enum(['New', 'Urgent', 'Standard']),
-  imageUrl: z.string().url('Please enter a valid URL.'),
+  heroImageUrl: z.string().url('Please enter a valid URL for the hero image.'),
+  thumbnailImageUrl: z.string().url('Please enter a valid URL for the thumbnail image.'),
 });
 
 interface NewsArticleFormProps {
@@ -62,7 +63,8 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
       author: article?.author || '',
       category: article?.category || '',
       status: article?.status || 'New',
-      imageUrl: article?.imageUrl || `https://picsum.photos/seed/${Math.random()}/1280/720`,
+      heroImageUrl: article?.heroImageUrl || `https://picsum.photos/seed/${Math.random()}/1280/720`,
+      thumbnailImageUrl: article?.thumbnailImageUrl || `https://picsum.photos/seed/${Math.random()}/640/360`,
     },
   });
 
@@ -171,21 +173,37 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
             />
             <FormField
             control={form.control}
-            name="imageUrl"
+            name="thumbnailImageUrl"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Image URL</FormLabel>
+                <FormLabel>Thumbnail Image URL</FormLabel>
                 <FormControl>
-                    <Input placeholder="https://example.com/image.png" {...field} />
+                    <Input placeholder="https://example.com/thumbnail.png" {...field} />
                 </FormControl>
                 <FormDescription>
-                    Provide a URL for the article's header image.
+                    Image for list views (aspect ratio 16:9).
                 </FormDescription>
                 <FormMessage />
                 </FormItem>
             )}
             />
         </div>
+        <FormField
+            control={form.control}
+            name="heroImageUrl"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Hero Image URL</FormLabel>
+                <FormControl>
+                    <Input placeholder="https://example.com/hero-image.png" {...field} />
+                </FormControl>
+                <FormDescription>
+                    Large image for the top of the article page.
+                </FormDescription>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
         <div className="flex gap-4">
             <Button type="submit">
                 {isEditMode ? 'Update Article' : 'Create Article'}

@@ -41,7 +41,7 @@ function NewsArticleItem({
   index: number;
 }) {
   // Fallback for invalid image URLs in existing data
-  let imageUrl = article.imageUrl;
+  let imageUrl = article.thumbnailImageUrl;
   const invalidUrl = 'https://share.google/NAhSwqWsCY9tHvMmR';
   if (imageUrl === invalidUrl || !imageUrl) {
     // Generate a consistent placeholder based on the article ID

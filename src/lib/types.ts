@@ -6,7 +6,8 @@ export interface NewsArticle {
   content: string;
   author: string;
   publicationDate: Timestamp | string;
-  imageUrl: string;
+  heroImageUrl: string;
+  thumbnailImageUrl: string;
   category: string;
   status: 'New' | 'Urgent' | 'Standard';
 }

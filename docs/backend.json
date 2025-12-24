@@ -9,11 +9,12 @@
         "content": { "type": "string" },
         "author": { "type": "string" },
         "publicationDate": { "type": "string", "format": "date-time" },
-        "imageUrl": { "type": "string", "format": "uri" },
+        "heroImageUrl": { "type": "string", "format": "uri" },
+        "thumbnailImageUrl": { "type": "string", "format": "uri" },
         "category": { "type": "string" },
         "status": { "type": "string", "enum": ["New", "Urgent", "Standard"] }
       },
-      "required": ["title", "content", "author", "publicationDate", "imageUrl", "category", "status"]
+      "required": ["title", "content", "author", "publicationDate", "heroImageUrl", "thumbnailImageUrl", "category", "status"]
     },
     "JobPosting": {
       "title": "JobPosting",

@@ -64,7 +64,7 @@ export default function NewsArticlePage() {
   }
 
   // Fallback for invalid image URLs in existing data
-  let imageUrl = article.imageUrl;
+  let imageUrl = article.heroImageUrl;
   const invalidUrl = 'https://share.google/NAhSwqWsCY9tHvMmR';
   if (imageUrl === invalidUrl || !imageUrl) {
     // Generate a consistent placeholder based on the article ID
