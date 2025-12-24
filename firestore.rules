@@ -43,8 +43,27 @@ service cloud.firestore {
     // Public Content Collections
     // ------------------------------------------------------------------------
 
-    match /{collection}/{docId}
-      where collection in ['news_articles', 'job_postings', 'vlogs', 'ebooks', 'services'] {
+    match /news_articles/{articleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /job_postings/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /vlogs/{vlogId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /ebooks/{ebookId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /services/{serviceId} {
       allow read: if true;
       allow write: if isAdmin();
     }
