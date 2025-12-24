@@ -37,7 +37,7 @@ const trustBadges = [
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32">
       <div className="bg-primary text-primary-foreground py-16 text-center">
         <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Professional Services</h1>

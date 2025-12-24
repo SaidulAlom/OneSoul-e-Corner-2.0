@@ -30,12 +30,12 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <div className="flex flex-col sm:gap-4 sm:py-4">
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pt-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <SidebarTrigger className="sm:hidden" />
           <h1 className="font-headline text-2xl font-bold">Dashboard</h1>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 md:gap-8 pt-8">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 md:gap-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
