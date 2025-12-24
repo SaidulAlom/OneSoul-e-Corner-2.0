@@ -1,103 +1,114 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
-  dynamicContentLoading,
-  DynamicContentLoadingOutput,
-} from '@/ai/flows/dynamic-content-loading';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlayCircle } from 'lucide-react';
+  collection,
+  query,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 import { motion } from 'framer-motion';
+import { PlayCircle } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 
-const fallbackContent = [
-  'A Day in the Life of a Software Engineer at Google.',
-  'How to Ace Your Next Technical Interview.',
-  'Campus Tour: See what life is like at MIT.',
-  'Beginner\'s Guide to Machine Learning with Python.',
-  'Top 5 Tips for Effective Remote Learning.',
-  'Exploring the Future of Web Development with Next.js 15.',
-  'Financial Aid Explained: Navigating Scholarships and Loans.',
-  'Building a Personal Brand for Your Career.',
-];
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { Vlog } from '@/lib/types';
+import Image from 'next/image';
+
+function VlogItem({
+  vlog,
+  index,
+}: {
+  vlog: Vlog;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+    >
+      <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300 overflow-hidden">
+        <a href={vlog.videoUrl} target="_blank" rel="noopener noreferrer">
+            <div className="relative aspect-video">
+                <Image src={vlog.thumbnailUrl} alt={vlog.title} fill className="object-cover"/>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-16 h-16 text-white"/>
+                </div>
+            </div>
+            <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">
+                {vlog.title}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground line-clamp-2">{vlog.description}</p>
+            </CardContent>
+        </a>
+      </Card>
+    </motion.div>
+  );
+}
 
 export default function VlogsList() {
-  const [content, setContent] = useState<
-    DynamicContentLoadingOutput['relevantContent'] | null
-  >(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const firestore = useFirestore();
 
-  useEffect(() => {
-    async function loadContent() {
-      setIsLoading(true);
-      try {
-        const result = await dynamicContentLoading({
-          userInteractions:
-            'User is interested in educational content, career advice, and university life.',
-          contentType: 'learning',
-        });
+  const vlogsCollectionQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'vlogs'),
+      orderBy('publishedDate', 'desc')
+    );
+  }, [firestore]);
 
-        if (result && result.relevantContent && result.relevantContent.length > 0) {
-          setContent(result.relevantContent);
-        } else {
-          throw new Error('AI returned no content.');
-        }
-      } catch (error) {
-        console.error('Failed to load dynamic content, using fallback:', error);
-        setContent(fallbackContent);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadContent();
-  }, []);
+  const {
+    data: vlogs,
+    isLoading,
+    error,
+  } = useCollection<Vlog>(vlogsCollectionQuery);
+
+  if (error) {
+    return (
+      <div className="text-center py-10 px-4">
+        <p className="text-destructive">
+          Error loading vlogs: {error.message}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {isLoading
-        ? Array.from({ length: 5 }).map((_, i) => (
-            <Card
-              key={i}
-              className="bg-secondary/20 border-white/10 p-4"
-            >
-              <CardHeader className="flex flex-row items-center gap-4 p-2">
-                <Skeleton className="w-10 h-10 rounded-lg" />
-                <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-4/5 rounded-md" />
-                </div>
-              </CardHeader>
-              <CardContent className="p-2 pt-0">
-                <Skeleton className="h-4 w-full rounded-md" />
-                <Skeleton className="h-4 w-1/2 rounded-md mt-2" />
-              </CardContent>
-            </Card>
-          ))
-        : content?.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300">
-                <CardHeader className="flex flex-row items-start gap-4">
-                  <div className="p-3 rounded-xl bg-primary/20 border border-primary/30">
-                    <PlayCircle className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-foreground">
-                      {item.split('. ')[0]}.
-                    </CardTitle>
-                  </div>
+    <div className="grid md:grid-cols-2 gap-8">
+      {isLoading &&
+        Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="bg-secondary/20 border-white/10">
+                <Skeleton className="aspect-video w-full" />
+                <CardHeader>
+                    <Skeleton className="h-6 w-3/4 rounded-md" />
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    {item.substring(item.indexOf('. ') + 2) || item}
-                  </p>
+                <CardContent className="space-y-2">
+                    <Skeleton className="h-4 w-full rounded-md" />
+                    <Skeleton className="h-4 w-5/6 rounded-md" />
                 </CardContent>
-              </Card>
-            </motion.div>
+            </Card>
           ))}
+
+      {!isLoading &&
+        vlogs?.map((vlog, index) => (
+          <VlogItem key={vlog.id} vlog={vlog} index={index} />
+        ))}
+      
+      {!isLoading && vlogs?.length === 0 && (
+        <div className="md:col-span-2 text-center py-10 px-4 bg-secondary/20 rounded-lg">
+            <h3 className="text-xl font-semibold">No Vlogs Available... Yet!</h3>
+            <p className="text-muted-foreground mt-2">Check back soon for new video content.</p>
+        </div>
+      )}
     </div>
   );
 }

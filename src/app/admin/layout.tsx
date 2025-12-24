@@ -2,26 +2,15 @@
 
 import Link from 'next/link';
 import {
-  Bell,
   Home,
-  LineChart,
   Newspaper,
-  Package,
-  Package2,
+  Briefcase,
+  Play,
+  BookOpen,
+  Layers,
   Settings,
-  ShoppingCart,
-  Users,
 } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Sidebar,
   SidebarContent,
@@ -32,11 +21,8 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarInset,
-  SidebarTrigger,
-  SidebarMenuBadge,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
 
 export default function AdminLayout({
@@ -65,34 +51,48 @@ export default function AdminLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/news" isActive={pathname.startsWith('/admin/news')}>
+              <SidebarMenuButton
+                href="/admin/news"
+                isActive={pathname.startsWith('/admin/news')}
+              >
                 <Newspaper />
                 <span>News</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <ShoppingCart />
-                <span>Orders</span>
-                <SidebarMenuBadge>6</SidebarMenuBadge>
+              <SidebarMenuButton
+                href="/admin/jobs"
+                isActive={pathname.startsWith('/admin/jobs')}
+              >
+                <Briefcase />
+                <span>Jobs</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <Package />
-                <span>Products</span>
+              <SidebarMenuButton
+                href="/admin/vlogs"
+                isActive={pathname.startsWith('/admin/vlogs')}
+              >
+                <Play />
+                <span>Vlogs</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <Users />
-                <span>Customers</span>
+              <SidebarMenuButton
+                href="/admin/ebooks"
+                isActive={pathname.startsWith('/admin/ebooks')}
+              >
+                <BookOpen />
+                <span>E-Books</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <LineChart />
-                <span>Analytics</span>
+              <SidebarMenuButton
+                href="/admin/services"
+                isActive={pathname.startsWith('/admin/services')}
+              >
+                <Layers />
+                <span>Services</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

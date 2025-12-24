@@ -1,25 +1,27 @@
 /**
- * @fileoverview Firestore Security Rules for a News Application
+ * @fileoverview Firestore Security Rules for NexusEd Application
  * @author Firebase Security Rules Architect
  *
  * @description
- * This ruleset establishes a role-based access control model for a news platform.
- * The core philosophy is to make news articles publicly readable while restricting all
- * content management (creation, updates, deletion) to a specific set of users
- * designated as administrators.
+ * This ruleset establishes a role-based access control model. The core philosophy
+ * is to make most content publicly readable while restricting all content management
+ * (creation, updates, deletion) to users designated as administrators.
  *
  * Core Philosophy:
- * - Public Read Access: All users, including unauthenticated visitors, can read news articles.
- * - Admin-Only Writes: Only users designated as administrators can create, update, or delete news articles.
+ * - Public Read Access: All users, including unauthenticated visitors, can read content.
+ * - Admin-Only Writes: Only administrators can create, update, or delete content.
  *
  * Data Structure:
- * - /news_articles/{newsArticleId}: A top-level collection containing all news articles. This flat structure is efficient for public queries.
- * - /roles_admin/{uid}: A dedicated collection to manage administrator roles. The existence of a document in this collection, where the document ID is a user's UID, grants that user admin privileges.
+ * - /news_articles, /job_postings, /vlogs, /ebooks, /services: Content collections.
+ * - /roles_admin/{uid}: Manages administrator roles. The existence of a document
+ *   for a user's UID grants that user admin privileges.
  *
  * Key Security Decisions:
- * - Role Management Lockdown: The `/roles_admin` collection is not readable or writable by any client. Roles must be assigned out-of-band using the Firebase Admin SDK in a trusted server environment. This prevents privilege escalation from the client-side.
- * - No Data Shape Validation: In this prototyping phase, the rules focus strictly on authorization (who can do what) and not on data validation (the shape or type of the news article content). This allows for rapid iteration on the frontend and backend data models.
- * - Denormalization for Authorization: The `/roles_admin` collection serves as a direct lookup for authorization. This avoids complex and slow `get()` calls to user profile documents and provides a clear, secure way to check for admin privileges.
+ * - Role Management Lockdown: The `/roles_admin` collection is not readable or
+ *   writable by any client. Roles must be assigned out-of-band using the
+ *   Firebase Admin SDK in a trusted server environment.
+ * - No Data Shape Validation: Rules focus strictly on authorization (who can do what),
+ *   not on data validation (the shape or type of content).
  */
 rules_version = '2';
 service cloud.firestore {
@@ -29,64 +31,50 @@ service cloud.firestore {
     // Helper Functions
     // ------------------------------------------------------------------------
 
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the currently authenticated user has admin privileges.
-     * Admin status is conferred by the existence of a document for the user's
-     * UID in the `/roles_admin` collection.
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-
     // ------------------------------------------------------------------------
-    // Collection Rules
+    // Generic Content Collection Rules
     // ------------------------------------------------------------------------
 
-    /**
-     * @description Rules for the collection of news articles.
-     *   Allows public read access for all users but restricts all write
-     *   operations (create, update, delete) to authenticated administrators.
-     * @path /news_articles/{newsArticleId}
-     * @allow (get) Any user, signed in or not, can read a single news article.
-     * @allow (list) Any user, signed in or not, can list all news articles.
-     * @allow (create) An authenticated admin can create a new news article.
-     * @deny (create) A regular signed-in user cannot create a news article.
-     * @deny (update) An unauthenticated user cannot update a news article.
-     * @principle Public read with role-based writes.
-     */
-    match /news_articles/{newsArticleId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+    function publicReadAdminWrite() {
+      return {
+        allow get: if true,
+        allow list: if true,
+        allow create: if isAdmin(),
+        allow update: if isAdmin() && resource != null,
+        allow delete: if isAdmin() && resource != null
+      };
     }
 
-    /**
-     * @description Rules for the admin roles collection.
-     *   This collection is completely locked down from client-side access.
-     *   It serves as an internal lookup table for security rules and must only
-     *   be managed by a trusted backend server using the Admin SDK.
-     * @path /roles_admin/{uid}
-     * @allow (any) No operation is permitted from the client.
-     * @deny (get) A user, even an admin, cannot read a role document directly.
-     * @deny (create) An admin cannot grant admin rights to another user from the client.
-     * @principle Lockdown of sensitive authorization data.
-     */
+    match /news_articles/{docId} {
+      rules: publicReadAdminWrite()
+    }
+    match /job_postings/{docId} {
+      rules: publicReadAdminWrite()
+    }
+    match /vlogs/{docId} {
+      rules: publicReadAdminWrite()
+    }
+    match /ebooks/{docId} {
+      rules: publicReadAdminWrite()
+    }
+    match /services/{docId} {
+      rules: publicReadAdminWrite()
+    }
+
+    // ------------------------------------------------------------------------
+    // Role Management Rules
+    // ------------------------------------------------------------------------
+
     match /roles_admin/{uid} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read, write: if false;
     }
   }
 }
