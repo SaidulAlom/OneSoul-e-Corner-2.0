@@ -40,6 +40,15 @@ function NewsArticleItem({
   article: NewsArticle;
   index: number;
 }) {
+  // Fallback for invalid image URLs in existing data
+  let imageUrl = article.imageUrl;
+  const invalidUrl = 'https://share.google/NAhSwqWsCY9tHvMmR';
+  if (imageUrl === invalidUrl || !imageUrl) {
+    // Generate a consistent placeholder based on the article ID
+    const seed = article.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    imageUrl = `https://picsum.photos/seed/${seed}/640/360`;
+  }
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,7 +58,7 @@ function NewsArticleItem({
       <Card className="bg-secondary/30 border border-white/10 backdrop-blur-md shadow-lg hover:border-primary/50 transition-colors duration-300 flex flex-col sm:flex-row gap-6 p-6">
         <div className="relative w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
           <Image
-            src={article.imageUrl}
+            src={imageUrl}
             alt={article.title}
             fill
             className="object-cover rounded-md"
