@@ -55,7 +55,7 @@ export default function Footer() {
           <div className="col-span-1 lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2">
               <Logo className="h-10 w-10 text-primary" />
-              <span className="font-headline text-2xl font-bold">NexusEd</span>
+              <span className="font-headline text-2xl font-bold">OneSoul e Corner</span>
             </Link>
             <p className="mt-4 text-muted-foreground max-w-xs">
               Your futuristic portal to knowledge, careers, and digital services.
@@ -96,7 +96,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-16 pt-8 border-t text-center text-muted-foreground text-sm">
-          <p>&copy; {new Date().getFullYear()} NexusEd. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} OneSoul e Corner. All rights reserved.</p>
         </div>
       </div>
     </footer>

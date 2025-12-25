@@ -18,7 +18,7 @@ const fontHeadline = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'NexusEd - Your Portal to Knowledge and Opportunity',
+  title: 'OneSoul e Corner - Your Portal to Knowledge and Opportunity',
   description:
     'A futuristic platform for Education, Jobs, News, and Digital Services.',
 };

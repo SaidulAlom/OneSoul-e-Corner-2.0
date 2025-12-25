@@ -56,7 +56,7 @@ export default function Header() {
             <Link href="/" className="flex items-center space-x-2">
               <Logo className="h-8 w-8 animate-[breathe_4s_ease-in-out_infinite]" />
               <span className="font-headline text-xl font-bold text-foreground">
-                NexusEd
+                OneSoul e Corner
               </span>
             </Link>
 
@@ -107,7 +107,7 @@ export default function Header() {
                  <Link href="/" className="flex items-center space-x-2" onClick={toggleMobileMenu}>
                     <Logo className="h-8 w-8" />
                     <span className="font-headline text-xl font-bold text-foreground">
-                      NexusEd
+                      OneSoul e Corner
                     </span>
                   </Link>
                 <Button variant="ghost" size="icon" onClick={toggleMobileMenu} aria-label="Close menu">
