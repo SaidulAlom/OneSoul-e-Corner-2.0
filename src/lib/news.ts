@@ -1,12 +1,9 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { db } from '@/firebase/admin';
 import { NewsArticle } from '@/lib/types';
 
 export async function getNewsArticles(): Promise<NewsArticle[]> {
   try {
-    const { firestore } = initializeFirebase();
-    const q = query(collection(firestore, 'news'), orderBy('publishedAt', 'desc'));
-    const snapshot = await getDocs(q);
+    const snapshot = await db.collection('news').orderBy('publishedAt', 'desc').get();
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
