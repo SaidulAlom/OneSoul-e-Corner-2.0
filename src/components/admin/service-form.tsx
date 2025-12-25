@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ProfessionalService } from '@/lib/types';
 
@@ -115,10 +115,11 @@ export default function ServiceForm({ service }: ServiceFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
+                <RichTextEditor
+                  content={field.value}
+                  onChange={field.onChange}
                   placeholder="Detailed description of the service..."
-                  className="h-32"
-                  {...field}
+                  minHeight="200px"
                 />
               </FormControl>
               <FormMessage />

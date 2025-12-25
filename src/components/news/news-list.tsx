@@ -37,7 +37,7 @@ function NewsArticleItem({ article }: { article: NewsArticle }) {
             <CardHeader className="p-0">
                 <p className="text-sm text-muted-foreground mb-1">
                   <span>{article.category}</span> &middot;{' '}
-                  <span>{formatDate(article.publicationDate)}</span>
+                  <span>{formatDate(article.publishedAt || article.publicationDate)}</span>
                 </p>
                 <CardTitle className="text-xl font-semibold text-foreground leading-tight">
                     <Link href={`/news/${article.id}`} className="hover:text-primary transition-colors">

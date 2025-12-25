@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import type { EBook } from '@/lib/types';
 
 const formSchema = z.object({
@@ -107,10 +107,11 @@ export default function EBookForm({ ebook }: EBookFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
+                <RichTextEditor
+                  content={field.value}
+                  onChange={field.onChange}
                   placeholder="Write the e-book description here..."
-                  className="h-32"
-                  {...field}
+                  minHeight="200px"
                 />
               </FormControl>
               <FormMessage />

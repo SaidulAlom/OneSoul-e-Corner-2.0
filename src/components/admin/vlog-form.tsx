@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import type { Vlog } from '@/lib/types';
 
 const formSchema = z.object({
@@ -97,10 +97,11 @@ export default function VlogForm({ vlog }: VlogFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
+                <RichTextEditor
+                  content={field.value}
+                  onChange={field.onChange}
                   placeholder="Write the vlog description here..."
-                  className="h-32"
-                  {...field}
+                  minHeight="200px"
                 />
               </FormControl>
               <FormMessage />

@@ -1,15 +1,18 @@
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
+import { NewsArticle } from '@/lib/types';
 
-import { db } from '@/firebase/admin';
-import { cache } from 'react';
-import { NewsArticle } from './types';
-
-export const getNewsArticles = cache(async () => {
-  const snapshot = await db.collection('news').get();
-  
-  const articles: NewsArticle[] = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-  } as NewsArticle));
-  
-  return articles;
-});
+export async function getNewsArticles(): Promise<NewsArticle[]> {
+  try {
+    const { firestore } = initializeFirebase();
+    const q = query(collection(firestore, 'news'), orderBy('publishedAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    } as NewsArticle));
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    return [];
+  }
+}

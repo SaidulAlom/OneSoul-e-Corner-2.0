@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 const formSchema = z.object({
   jobTitle: z.string().min(2, "Job title must be at least 2 characters."),
@@ -108,10 +108,11 @@ export default function SubmitJobForm() {
             <FormItem>
               <FormLabel>Job Description</FormLabel>
               <FormControl>
-                <Textarea
+                <RichTextEditor
+                  content={field.value}
+                  onChange={field.onChange}
                   placeholder="Tell us about the role, responsibilities, and requirements..."
-                  className="resize-none bg-background/50 h-40 focus:ring-primary focus:ring-2 focus:bg-background transition-all"
-                  {...field}
+                  minHeight="250px"
                 />
               </FormControl>
               <FormMessage />

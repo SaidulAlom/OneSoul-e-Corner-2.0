@@ -46,6 +46,11 @@ service cloud.firestore {
     // Public Content Collections
     // ------------------------------------------------------------------------
 
+    match /news/{articleId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
     match /news_articles/{articleId} {
       allow read: if true;
       allow create: if isSignedIn();

@@ -4,16 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import {
-  addDocumentNonBlocking,
-  updateDocumentNonBlocking,
-} from '@/firebase/non-blocking-updates';
 import { useFirestore } from '@/firebase';
-import {
-  collection,
-  doc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import type { NewsArticle } from '@/lib/types';
 import {
     Select,
@@ -44,8 +36,8 @@ const formSchema = z.object({
   author: z.string().min(2, 'Author is required.'),
   category: z.string().min(2, 'Category is required.'),
   status: z.enum(['New', 'Urgent', 'Standard']),
-  heroImageUrl: z.any().refine(val => val, { message: 'Hero image is required.'}),
-  thumbnailImageUrl: z.any().refine(val => val, { message: 'Thumbnail image is required.'}),
+  heroImageUrl: z.string().optional(),
+  thumbnailImageUrl: z.string().optional(),
 });
 
 interface NewsArticleFormProps {
@@ -73,33 +65,32 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore) return;
-    
-    // In a real app, you'd upload the files from the file inputs,
-    // get their URLs from a storage service (like Firebase Storage),
-    // and then set those URLs as values.heroImageUrl and values.thumbnailImageUrl
-    // before saving to Firestore.
-    // For this UI simulation, we're just using the preview URLs (or existing ones).
-    const dataToSave = {
-        ...values,
-        heroImageUrl: heroImagePreview || values.heroImageUrl,
-        thumbnailImageUrl: thumbnailImagePreview || values.thumbnailImageUrl
-    };
-    
-    if (isEditMode && article.id) {
-      const articleRef = doc(firestore, 'news_articles', article.id);
-      updateDocumentNonBlocking(articleRef, {
-        ...dataToSave,
-        publicationDate: article.publicationDate, // Keep existing date on edit
-      });
-    } else {
-      const collectionRef = collection(firestore, 'news_articles');
-      addDocumentNonBlocking(collectionRef, {
-        ...dataToSave,
-        publicationDate: serverTimestamp(),
-      });
+    if (!firestore) {
+      alert('Firebase not initialized');
+      return;
     }
-    router.push('/admin/news');
+    
+    try {
+      await addDoc(collection(firestore, 'news'), {
+        title: values.title,
+        content: values.content,
+        summary: values.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
+        author: values.author,
+        category: values.category,
+        publishedAt: new Date().toISOString(),
+        imageUrl: 'https://via.placeholder.com/640x360',
+        heroImageUrl: 'https://via.placeholder.com/1280x720',
+        thumbnailImageUrl: 'https://via.placeholder.com/640x360',
+        tags: [values.category.toLowerCase()],
+        status: values.status
+      });
+      
+      alert('Article created successfully!');
+      router.push('/admin/news');
+    } catch (error) {
+      console.error('Error saving article:', error);
+      alert(`Error: ${error.message}`);
+    }
   }
 
   const handleImageChange = (
@@ -143,10 +134,11 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea
+                <RichTextEditor
+                  content={field.value}
+                  onChange={field.onChange}
                   placeholder="Write the full article content here..."
-                  className="h-48"
-                  {...field}
+                  minHeight="300px"
                 />
               </FormControl>
               <FormMessage />
