@@ -96,7 +96,11 @@ export function RichTextEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      // Get HTML and optimize it to reduce size
+      let html = editor.getHTML();
+      // Remove unnecessary whitespace and newlines
+      html = html.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim();
+      onChange(html);
     },
   });
 

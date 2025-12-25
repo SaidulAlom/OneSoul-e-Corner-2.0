@@ -4,12 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import {
-  addDocumentNonBlocking,
-  updateDocumentNonBlocking,
-} from '@/firebase/non-blocking-updates';
 import { useFirestore } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 import * as LucideIcons from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -45,6 +42,7 @@ interface ServiceFormProps {
 export default function ServiceForm({ service }: ServiceFormProps) {
   const router = useRouter();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const isEditMode = !!service;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,21 +58,71 @@ export default function ServiceForm({ service }: ServiceFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore) return;
-
-    const dataToSave = {
-        ...values,
-        features: values.features.split(',').map(f => f.trim()),
-    };
-
-    if (isEditMode && service.id) {
-      const serviceRef = doc(firestore, 'services', service.id);
-      updateDocumentNonBlocking(serviceRef, dataToSave);
-    } else {
-      const collectionRef = collection(firestore, 'services');
-      addDocumentNonBlocking(collectionRef, dataToSave);
+    if (!firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Firebase not initialized',
+      });
+      return;
     }
-    router.push('/admin/services');
+
+    try {
+      const dataToSave = {
+        ...values,
+        features: values.features.split(',').map(f => f.trim()).filter(f => f.length > 0),
+      };
+
+      if (isEditMode && service.id) {
+        const serviceRef = doc(firestore, 'services', service.id);
+        await updateDoc(serviceRef, dataToSave);
+        toast({
+          title: 'Success',
+          description: 'Service updated successfully!',
+        });
+      } else {
+        const collectionRef = collection(firestore, 'services');
+        const docRef = await addDoc(collectionRef, dataToSave);
+        
+        if (!docRef || !docRef.id) {
+          throw new Error('Failed to create service: No document ID returned');
+        }
+        
+        console.log('Service saved successfully with ID:', docRef.id);
+        
+        toast({
+          title: 'Success',
+          description: 'Service created and saved successfully!',
+        });
+      }
+      
+      router.push('/admin/services');
+    } catch (error: any) {
+      console.error('Error saving service:', error);
+      const errorMessage = error.message || 'Failed to save service';
+      
+      if (error.code === 'permission-denied') {
+        toast({
+          variant: 'destructive',
+          title: 'Permission Denied',
+          description: 'You do not have permission to create services. Please ensure you are signed in.',
+        });
+      } else if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
+        toast({
+          variant: 'destructive',
+          title: 'Network Error',
+          description: 'Failed to save service due to network issues. Please check your connection and try again.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Service',
+          description: errorMessage || 'An unexpected error occurred. Please try again.',
+        });
+      }
+      
+      return;
+    }
   }
 
   return (

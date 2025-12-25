@@ -3,7 +3,7 @@ import { NewsArticle } from '@/lib/types';
 
 export async function getNewsArticles(): Promise<NewsArticle[]> {
   try {
-    const snapshot = await db.collection('news').orderBy('publishedAt', 'desc').get();
+    const snapshot = await db.collection('news_articles').orderBy('publicationDate', 'desc').get();
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),

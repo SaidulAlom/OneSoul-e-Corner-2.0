@@ -29,13 +29,21 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { NewsArticle } from '@/lib/types';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useFirestore } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 function NewsTable({ articles }: { articles: NewsArticle[] }) {
+  const firestore = useFirestore();
+
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this article?')) {
-      // For now, just show alert - deletion not implemented in local storage
-      alert('Delete functionality not implemented yet');
+      if (firestore) {
+        const articleRef = doc(firestore, 'news_articles', id);
+        deleteDocumentNonBlocking(articleRef);
+      }
     }
   };
 
@@ -67,7 +75,12 @@ function NewsTable({ articles }: { articles: NewsArticle[] }) {
                   {article.category}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {new Date(article.publishedAt).toLocaleDateString()}
+                  {article.publicationDate 
+                    ? new Date(article.publicationDate instanceof Date 
+                        ? article.publicationDate 
+                        : article.publicationDate.toDate?.() || article.publicationDate
+                      ).toLocaleDateString()
+                    : 'N/A'}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -102,7 +115,38 @@ function NewsTable({ articles }: { articles: NewsArticle[] }) {
   );
 }
 
-export default function AdminNewsPageContent({ articles }: { articles: NewsArticle[] }) {
+function NewsTableSkeleton() {
+  return (
+    <Card>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead className="hidden md:table-cell">Status</TableHead>
+              <TableHead className="hidden md:table-cell">Category</TableHead>
+              <TableHead className="hidden md:table-cell">Published</TableHead>
+              <TableHead><span className="sr-only">Actions</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
+                <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AdminNewsPageContent({ articles, isLoading }: { articles: NewsArticle[]; isLoading?: boolean }) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6">
       <main className="grid flex-1 items-start gap-4">
@@ -146,8 +190,9 @@ export default function AdminNewsPageContent({ articles }: { articles: NewsArtic
             </div>
           </div>
           <TabsContent value="all">
-            {articles && <NewsTable articles={articles} />}
-            {articles?.length === 0 && (
+            {isLoading && <NewsTableSkeleton />}
+            {articles && articles.length > 0 && <NewsTable articles={articles} />}
+            {articles?.length === 0 && !isLoading && (
                  <Card>
                     <CardHeader>
                         <CardTitle>No Articles Found</CardTitle>

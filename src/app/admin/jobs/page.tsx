@@ -80,7 +80,10 @@ function JobsTable({ jobs }: { jobs: JobPosting[] }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                       <DropdownMenuItem asChild>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/jobs/${job.id}`}>View</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link href={`/admin/jobs/edit/${job.id}`}>Edit</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDelete(job.id)}>

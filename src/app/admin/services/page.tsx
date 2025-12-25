@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { collection, query, orderBy, doc } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
+import { useMemo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -12,6 +13,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { ProfessionalService } from '@/lib/types';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Skeleton } from '@/components/ui/skeleton';
+import { seedDefaultServices } from '@/lib/seed-services';
 
 function ServicesTable({ services }: { services: ProfessionalService[] }) {
   const firestore = useFirestore();
@@ -57,6 +59,9 @@ function ServicesTable({ services }: { services: ProfessionalService[] }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/services/${service.id}`}>View</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/admin/services/edit/${service.id}`}>Edit</Link>
                       </DropdownMenuItem>
@@ -113,13 +118,46 @@ function ServicesTableSkeleton() {
 
 export default function AdminServicesPage() {
   const firestore = useFirestore();
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const servicesCollectionQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'services'), orderBy('title'));
+    // Use collection without orderBy to avoid index requirement
+    return collection(firestore, 'services');
   }, [firestore]);
 
   const { data: services, isLoading } = useCollection<ProfessionalService>(servicesCollectionQuery);
+
+  // Auto-seed default services if collection is empty
+  useEffect(() => {
+    if (!firestore || isLoading || isSeeding) return;
+    
+    if (services && services.length === 0) {
+      setIsSeeding(true);
+      seedDefaultServices(firestore)
+        .then((count) => {
+          if (count > 0) {
+            console.log(`Auto-seeded ${count} default services`);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to seed default services:', error);
+        })
+        .finally(() => {
+          setIsSeeding(false);
+        });
+    }
+  }, [firestore, services, isLoading, isSeeding]);
+
+  // Sort services client-side by title
+  const sortedServices = useMemo(() => {
+    if (!services) return null;
+    return [...services].sort((a, b) => {
+      const titleA = a.title?.toLowerCase() || '';
+      const titleB = b.title?.toLowerCase() || '';
+      return titleA.localeCompare(titleB);
+    });
+  }, [services]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6">
@@ -138,8 +176,8 @@ export default function AdminServicesPage() {
           </div>
         </div>
         {isLoading && <ServicesTableSkeleton />}
-        {services && <ServicesTable services={services} />}
-        {services?.length === 0 && !isLoading && (
+        {sortedServices && sortedServices.length > 0 && <ServicesTable services={sortedServices} />}
+        {sortedServices?.length === 0 && !isLoading && (
           <Card>
             <CardHeader>
               <CardTitle>No Services Found</CardTitle>

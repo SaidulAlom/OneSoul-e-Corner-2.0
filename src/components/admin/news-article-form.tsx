@@ -5,7 +5,16 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useFirestore } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import {
+  addDoc,
+  updateDoc,
+} from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,9 +39,23 @@ import {
 import React, { useState } from 'react';
 import Image from 'next/image';
 
+// Firestore has a limit of ~1MB per field (1,048,487 bytes)
+const MAX_CONTENT_SIZE = 1000000; // ~1MB in bytes
+
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
-  content: z.string().min(20, 'Content must be at least 20 characters.'),
+  content: z.string()
+    .min(20, 'Content must be at least 20 characters.')
+    .refine(
+      (content) => {
+        // Calculate size in bytes (UTF-8 encoding)
+        const sizeInBytes = new Blob([content]).size;
+        return sizeInBytes <= MAX_CONTENT_SIZE;
+      },
+      {
+        message: `Content is too large. Maximum size is ${Math.round(MAX_CONTENT_SIZE / 1024)}KB. Please reduce the content or split it into multiple articles.`,
+      }
+    ),
   author: z.string().min(2, 'Author is required.'),
   category: z.string().min(2, 'Category is required.'),
   status: z.enum(['New', 'Urgent', 'Standard']),
@@ -47,6 +70,7 @@ interface NewsArticleFormProps {
 export default function NewsArticleForm({ article }: NewsArticleFormProps) {
   const router = useRouter();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const isEditMode = !!article;
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(article?.heroImageUrl || null);
   const [thumbnailImagePreview, setThumbnailImagePreview] = useState<string | null>(article?.thumbnailImageUrl || null);
@@ -66,30 +90,103 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) {
-      alert('Firebase not initialized');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Firebase not initialized',
+      });
+      return;
+    }
+
+    // Double-check content size before saving
+    const contentSize = new Blob([values.content]).size;
+    if (contentSize > MAX_CONTENT_SIZE) {
+      toast({
+        variant: 'destructive',
+        title: 'Content Too Large',
+        description: `Content size (${Math.round(contentSize / 1024)}KB) exceeds the maximum allowed size of ${Math.round(MAX_CONTENT_SIZE / 1024)}KB. Please reduce the content.`,
+      });
       return;
     }
     
     try {
-      await addDoc(collection(firestore, 'news'), {
+      const dataToSave = {
         title: values.title,
         content: values.content,
-        summary: values.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
         author: values.author,
         category: values.category,
-        publishedAt: new Date().toISOString(),
-        imageUrl: 'https://via.placeholder.com/640x360',
-        heroImageUrl: 'https://via.placeholder.com/1280x720',
-        thumbnailImageUrl: 'https://via.placeholder.com/640x360',
-        tags: [values.category.toLowerCase()],
-        status: values.status
-      });
+        status: values.status,
+        heroImageUrl: heroImagePreview || values.heroImageUrl || `https://picsum.photos/seed/${Math.random()}/1280/720`,
+        thumbnailImageUrl: thumbnailImagePreview || values.thumbnailImageUrl || `https://picsum.photos/seed/${Math.random()}/640/360`,
+      };
+
+      if (isEditMode && article?.id) {
+        const articleRef = doc(firestore, 'news_articles', article.id);
+        // Use updateDoc directly to await completion
+        await updateDoc(articleRef, {
+          ...dataToSave,
+          publicationDate: article.publicationDate, // Keep existing date on edit
+        });
+        toast({
+          title: 'Success',
+          description: 'Article updated successfully!',
+        });
+      } else {
+        const collectionRef = collection(firestore, 'news_articles');
+        // Use addDoc directly to await completion and ensure persistence
+        const docRef = await addDoc(collectionRef, {
+          ...dataToSave,
+          publicationDate: serverTimestamp(),
+        });
+        
+        // Verify the document was created
+        if (!docRef || !docRef.id) {
+          throw new Error('Failed to create article: No document ID returned');
+        }
+        
+        console.log('Article saved successfully with ID:', docRef.id);
+        
+        toast({
+          title: 'Success',
+          description: 'Article created and saved successfully!',
+        });
+      }
       
-      alert('Article created successfully!');
+      // Only redirect after successful save
       router.push('/admin/news');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving article:', error);
-      alert(`Error: ${error.message}`);
+      const errorMessage = error.message || 'Failed to save article';
+      
+      // Check for specific Firestore errors
+      if (error.code === 'permission-denied') {
+        toast({
+          variant: 'destructive',
+          title: 'Permission Denied',
+          description: 'You do not have permission to create articles. Please ensure you are signed in.',
+        });
+      } else if (errorMessage.includes('longer than') || errorMessage.includes('bytes')) {
+        toast({
+          variant: 'destructive',
+          title: 'Content Too Large',
+          description: 'The article content is too large for Firestore. Please reduce the content size or split it into multiple articles.',
+        });
+      } else if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
+        toast({
+          variant: 'destructive',
+          title: 'Network Error',
+          description: 'Failed to save article due to network issues. Please check your connection and try again.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Article',
+          description: errorMessage || 'An unexpected error occurred. Please try again.',
+        });
+      }
+      
+      // Don't redirect on error - let user fix and retry
+      return;
     }
   }
 
@@ -130,20 +227,31 @@ export default function NewsArticleForm({ article }: NewsArticleFormProps) {
         <FormField
           control={form.control}
           name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <RichTextEditor
-                  content={field.value}
-                  onChange={field.onChange}
-                  placeholder="Write the full article content here..."
-                  minHeight="300px"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const contentSize = new Blob([field.value || '']).size;
+            const sizeInKB = Math.round(contentSize / 1024);
+            const maxSizeInKB = Math.round(MAX_CONTENT_SIZE / 1024);
+            const isNearLimit = contentSize > MAX_CONTENT_SIZE * 0.9;
+            
+            return (
+              <FormItem>
+                <FormLabel>Content</FormLabel>
+                <FormControl>
+                  <RichTextEditor
+                    content={field.value}
+                    onChange={field.onChange}
+                    placeholder="Write the full article content here..."
+                    minHeight="300px"
+                  />
+                </FormControl>
+                <FormDescription className={isNearLimit ? 'text-destructive' : ''}>
+                  Content size: {sizeInKB}KB / {maxSizeInKB}KB
+                  {isNearLimit && ' (Approaching limit)'}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
 
         <div className="grid md:grid-cols-2 gap-8">

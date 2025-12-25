@@ -27,7 +27,7 @@ export default function NewsArticlePage() {
     return doc(firestore, 'news_articles', articleId);
   }, [firestore, articleId]);
 
-  const { data: article, isLoading } = useDoc<NewsArticle>(articleRef);
+  const { data: article, isLoading, error } = useDoc<NewsArticle>(articleRef);
 
   if (isLoading) {
     return (
@@ -47,6 +47,22 @@ export default function NewsArticlePage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen pt-32 pb-16 flex items-center justify-center text-center">
+        <div>
+          <h1 className="text-4xl font-bold">Error Loading Article</h1>
+          <p className="text-muted-foreground mt-2">
+            {error.message || 'An error occurred while loading the article.'}
+          </p>
+          <Link href="/news" className="mt-6 inline-block text-primary hover:underline">
+            &larr; Back to News
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!article) {
     return (
       <div className="min-h-screen pt-32 pb-16 flex items-center justify-center text-center">
@@ -55,7 +71,7 @@ export default function NewsArticlePage() {
           <p className="text-muted-foreground mt-2">
             The article you are looking for does not exist.
           </p>
-           <Link href="/news" className="mt-6 inline-block text-primary hover:underline">
+          <Link href="/news" className="mt-6 inline-block text-primary hover:underline">
             &larr; Back to News
           </Link>
         </div>
@@ -63,11 +79,39 @@ export default function NewsArticlePage() {
     );
   }
 
-  // Fallback for invalid image URLs in existing data
-  let imageUrl = article.heroImageUrl;
+  // Prioritize uploaded images (base64 data URLs) over placeholder URLs
   const invalidUrl = 'https://share.google/NAhSwqWsCY9tHvMmR';
-  if (imageUrl === invalidUrl || !imageUrl) {
-    // Generate a consistent placeholder based on the article ID
+  const isPlaceholderUrl = (url: string | undefined) => {
+    if (!url) return true;
+    return url.includes('picsum.photos') || 
+           url.includes('placehold.co') || 
+           url.includes('via.placeholder.com') ||
+           url === invalidUrl;
+  };
+  const isBase64Image = (url: string | undefined) => {
+    return url?.startsWith('data:image/') || false;
+  };
+  
+  // Determine which image to use:
+  // 1. Prefer uploaded images (base64) - thumbnail first if it's uploaded, then hero
+  // 2. Fall back to non-placeholder URLs
+  // 3. Finally use placeholder
+  let imageUrl: string;
+  
+  if (isBase64Image(article.thumbnailImageUrl)) {
+    // Thumbnail is uploaded (base64) - use it
+    imageUrl = article.thumbnailImageUrl;
+  } else if (isBase64Image(article.heroImageUrl)) {
+    // Hero is uploaded (base64) - use it
+    imageUrl = article.heroImageUrl;
+  } else if (article.thumbnailImageUrl && !isPlaceholderUrl(article.thumbnailImageUrl)) {
+    // Thumbnail is a valid URL (not placeholder)
+    imageUrl = article.thumbnailImageUrl;
+  } else if (article.heroImageUrl && !isPlaceholderUrl(article.heroImageUrl)) {
+    // Hero is a valid URL (not placeholder)
+    imageUrl = article.heroImageUrl;
+  } else {
+    // Both are placeholders or missing - generate placeholder
     const seed = article.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     imageUrl = `https://picsum.photos/seed/${seed}/1280/720`;
   }
@@ -106,11 +150,10 @@ export default function NewsArticlePage() {
             />
           </div>
 
-          <div className="prose prose-invert lg:prose-xl max-w-none text-foreground/90 prose-p:leading-relaxed prose-headings:text-foreground">
-            {article.content.split('\\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          <div 
+            className="prose prose-invert lg:prose-xl max-w-none text-foreground/90 prose-p:leading-relaxed prose-headings:text-foreground"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
 
         </article>
       </div>

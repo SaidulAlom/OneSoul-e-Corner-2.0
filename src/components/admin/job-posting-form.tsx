@@ -4,16 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import {
-  addDocumentNonBlocking,
-  updateDocumentNonBlocking,
-} from '@/firebase/non-blocking-updates';
 import { useFirestore } from '@/firebase';
 import {
   collection,
   doc,
   serverTimestamp,
+  addDoc,
+  updateDoc,
 } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -43,6 +42,7 @@ interface JobPostingFormProps {
 export default function JobPostingForm({ job }: JobPostingFormProps) {
   const router = useRouter();
   const firestore = useFirestore();
+  const { toast } = useToast();
   const isEditMode = !!job;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,22 +56,78 @@ export default function JobPostingForm({ job }: JobPostingFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore) return;
-
-    if (isEditMode && job.id) {
-      const jobRef = doc(firestore, 'job_postings', job.id);
-      updateDocumentNonBlocking(jobRef, {
-        ...values,
-        postedDate: serverTimestamp(),
+    if (!firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Firebase not initialized',
       });
-    } else {
-      const collectionRef = collection(firestore, 'job_postings');
-      addDocumentNonBlocking(collectionRef, {
-        ...values,
-        postedDate: serverTimestamp(),
-      });
+      return;
     }
-    router.push('/admin/jobs');
+
+    try {
+      if (isEditMode && job.id) {
+        const jobRef = doc(firestore, 'job_postings', job.id);
+        // Use updateDoc directly to await completion
+        await updateDoc(jobRef, {
+          ...values,
+          postedDate: job.postedDate, // Keep existing date on edit
+        });
+        toast({
+          title: 'Success',
+          description: 'Job posting updated successfully!',
+        });
+      } else {
+        const collectionRef = collection(firestore, 'job_postings');
+        // Use addDoc directly to await completion and ensure persistence
+        const docRef = await addDoc(collectionRef, {
+          ...values,
+          postedDate: serverTimestamp(),
+        });
+        
+        // Verify the document was created
+        if (!docRef || !docRef.id) {
+          throw new Error('Failed to create job posting: No document ID returned');
+        }
+        
+        console.log('Job posting saved successfully with ID:', docRef.id);
+        
+        toast({
+          title: 'Success',
+          description: 'Job posting created and saved successfully!',
+        });
+      }
+      
+      // Only redirect after successful save
+      router.push('/admin/jobs');
+    } catch (error: any) {
+      console.error('Error saving job posting:', error);
+      const errorMessage = error.message || 'Failed to save job posting';
+      
+      // Check for specific Firestore errors
+      if (error.code === 'permission-denied') {
+        toast({
+          variant: 'destructive',
+          title: 'Permission Denied',
+          description: 'You do not have permission to create job postings. Please ensure you are signed in.',
+        });
+      } else if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
+        toast({
+          variant: 'destructive',
+          title: 'Network Error',
+          description: 'Failed to save job posting due to network issues. Please check your connection and try again.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Job Posting',
+          description: errorMessage || 'An unexpected error occurred. Please try again.',
+        });
+      }
+      
+      // Don't redirect on error - let user fix and retry
+      return;
+    }
   }
 
   return (
