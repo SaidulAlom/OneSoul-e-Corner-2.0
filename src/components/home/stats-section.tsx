@@ -9,7 +9,7 @@ import CountUp from '@/components/ui/count-up';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useDoc } from '@/firebase/firestore/use-doc';
 import { Skeleton } from '@/components/ui/skeleton';
-import { initializeFirebase, getSdks } from '@/firebase';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 
 const formatNumber = (num: number): { value: number; suffix: string } => {
   if (num >= 1000000) {
@@ -22,22 +22,22 @@ const formatNumber = (num: number): { value: number; suffix: string } => {
 };
 
 export default function StatsSection() {
-  const { firestore } = getSdks(initializeFirebase());
+  const firestore = useFirestore();
 
-  const usersCollection = useMemo(
-    () => collection(firestore, 'users'),
+  const usersCollection = useMemoFirebase(
+    () => firestore ? collection(firestore, 'users') : null,
     [firestore]
   );
-  const jobsCollection = useMemo(
-    () => collection(firestore, 'jobs'),
+  const jobsCollection = useMemoFirebase(
+    () => firestore ? collection(firestore, 'job_postings') : null,
     [firestore]
   );
-  const ebooksCollection = useMemo(
-    () => collection(firestore, 'ebooks'),
+  const ebooksCollection = useMemoFirebase(
+    () => firestore ? collection(firestore, 'ebooks') : null,
     [firestore]
   );
-  const siteStatsDoc = useMemo(
-    () => doc(firestore, 'statistics/site'),
+  const siteStatsDoc = useMemoFirebase(
+    () => firestore ? doc(firestore, 'statistics/site') : null,
     [firestore]
   );
 
